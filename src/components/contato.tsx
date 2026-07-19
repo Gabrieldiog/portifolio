@@ -1,16 +1,11 @@
 import { contato, perfil } from "@/lib/dados";
 import { CopiarEmail } from "./copiar-email";
 
-// Avaliado no build (SSG); atualiza a cada deploy.
-const ano = new Date().getFullYear();
-
 export function Contato() {
   return (
     <footer id="contato" className="border-t border-line py-24 md:py-32">
       <div className="mx-auto max-w-6xl px-6 md:px-10">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
-          Contato
-        </p>
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">Contato</p>
         <h2 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight md:text-6xl">
           Tem um problema pra resolver?{" "}
           <span className="text-muted">Vamos conversar.</span>
@@ -48,7 +43,9 @@ export function Contato() {
           <span>
             {perfil.nomeCompleto} · {perfil.local}
           </span>
-          <span>© {ano} — feito à mão com Next.js</span>
+          <a href="#topo" className="transition-colors hover:text-accent">
+            ↑ voltar ao topo
+          </a>
         </div>
       </div>
     </footer>

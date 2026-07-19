@@ -11,11 +11,11 @@
   --color-line: #201d14;
   --color-text: #ece7d9;
   --color-muted: #9c9583;
-  --color-faint: #6b6555;
+  --color-faint: #8d8672; /* dá 4,5:1+ sobre bg e surface (AA em texto pequeno) */
   --color-accent: #d4a017;
   --color-accent-hi: #e9bc4a;
 
-  --font-display: var(--fonte-display), Georgia, serif;
+  --font-display: var(--fonte-display), system-ui, sans-serif;
   --font-sans: var(--fonte-sans), system-ui, sans-serif;
   --font-mono: var(--fonte-mono), ui-monospace, monospace;
 }
@@ -24,8 +24,9 @@
   color-scheme: dark;
 }
 
+/* NUNCA "smooth" aqui: briga com o Lenis (anchor links engasgam). */
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 body {
@@ -53,15 +54,34 @@ body {
   font-feature-settings: "tnum";
 }
 
-/* Âncoras não somem atrás do nav fixo. */
 [id] {
-  scroll-margin-top: 5.5rem;
+  scroll-margin-top: 2rem;
+}
+
+/* Spotlight global do cursor: um blob só, movido por transform. */
+.cursor-spotlight {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 480px;
+  height: 480px;
+  margin-left: -240px;
+  margin-top: -240px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(212, 160, 23, 0.11), transparent 70%);
+  pointer-events: none;
+  z-index: 40;
+  will-change: transform;
+  transform: translate3d(-600px, -600px, 0);
+}
+
+/* Fallback sem JS do WordRotator: só a 1ª palavra aparece
+   (o seletor de irmão ignora o ghost de largura que vem antes). */
+.word-rotator-item ~ .word-rotator-item {
+  opacity: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
   *,
   *::before,
   *::after {

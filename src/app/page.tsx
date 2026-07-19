@@ -1,19 +1,21 @@
-import { Nav } from "@/components/nav";
 import { Hero } from "@/components/hero";
+import { Historia } from "@/components/historia";
 import { Sistemas } from "@/components/sistemas";
+import { Projetos } from "@/components/projetos";
 import { Trajetoria } from "@/components/trajetoria";
-import { Sobre } from "@/components/sobre";
+import { Formacao } from "@/components/formacao";
 import { Contato } from "@/components/contato";
 
 export default function Home() {
   return (
     <>
-      <Nav />
       <main>
         <Hero />
+        <Historia />
         <Sistemas />
+        <Projetos />
         <Trajetoria />
-        <Sobre />
+        <Formacao />
       </main>
       <Contato />
     </>
