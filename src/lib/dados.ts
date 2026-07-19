@@ -31,7 +31,7 @@ export const historia: Capitulo[] = [
     marcador: "Fazenda",
     titulo: "A curiosidade nasceu no interior",
     texto:
-      "Cresci em fazenda, encantado com as automações: a luz que acendia sozinha ao passar, o irrigador que ligava na hora certa. Eu precisava entender como aquilo funcionava.",
+      "Cresci em fazenda, encantado com o que funcionava sozinho: a luz do sensor de presença que acendia ao passar, o irrigador que ligava na hora certa pelo timer, a boia que enchia a caixa d'água e desligava a bomba, o portão que abria com um botão. Eu precisava entender como aquilo funcionava.",
   },
   {
     marcador: "Jogos",
@@ -131,7 +131,7 @@ export const sistemas: Sistema[] = [
   },
 ];
 
-// ── Projetos autorais (no ar, com link) ─────────────────────────────────────
+// ── Projetos no ar (com link e print real) ──────────────────────────────────
 export type Projeto = {
   id: string;
   nome: string;
@@ -139,9 +139,19 @@ export type Projeto = {
   stack: string[];
   link: string;
   repo?: string;
+  imagem: string;
 };
 
 export const projetos: Projeto[] = [
+  {
+    id: "gpol",
+    nome: "GPol",
+    descricao:
+      "Inteligência política em tempo real: mapa de votos dos 5.570 municípios, dados do TSE e do Censo e escuta social com IA. Em produção com 40 pessoas em 2 estados.",
+    stack: ["Node.js", "TypeScript", "Python", "SQL"],
+    link: "https://sergio.seg.br/gpol-/",
+    imagem: "/projetos/gpol.png",
+  },
   {
     id: "fox",
     nome: "Fox Finance",
@@ -150,6 +160,7 @@ export const projetos: Projeto[] = [
     stack: ["Next.js", "TypeScript", "PostgreSQL", "Drizzle"],
     link: "https://fox-finance.vercel.app",
     repo: "https://github.com/Gabrieldiog/FOX-finance",
+    imagem: "/projetos/fox.png",
   },
   {
     id: "balcao",
@@ -159,6 +170,7 @@ export const projetos: Projeto[] = [
     stack: ["Python", "FastAPI", "Docker"],
     link: "https://balcaoo.netlify.app",
     repo: "https://github.com/Gabrieldiog/gateway-",
+    imagem: "/projetos/balcao.png",
   },
   {
     id: "algoshorts",
@@ -168,6 +180,7 @@ export const projetos: Projeto[] = [
     stack: ["Next.js", "TypeScript", "Web Audio"],
     link: "https://algoshorts.netlify.app",
     repo: "https://github.com/Gabrieldiog/algo-shorts",
+    imagem: "/projetos/algoshorts.png",
   },
   {
     id: "maiormenor",
@@ -177,6 +190,7 @@ export const projetos: Projeto[] = [
     stack: ["Next.js", "TypeScript", "WebSocket"],
     link: "https://game-numbers.vercel.app",
     repo: "https://github.com/Gabrieldiog/game-numbers",
+    imagem: "/projetos/maiormenor.png",
   },
   {
     id: "pharmacy",
@@ -186,6 +200,7 @@ export const projetos: Projeto[] = [
     stack: ["TypeScript", "Scraping", "APIs"],
     link: "https://pharmacy-price.netlify.app",
     repo: "https://github.com/Gabrieldiog/Pharmacy-price",
+    imagem: "/projetos/pharmacy.png",
   },
 ];
 
