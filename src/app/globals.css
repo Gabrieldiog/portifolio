@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+/* ─ Sistema "Mostarda no Escuro" ─────────────────────────────────────────
+   Preto quente (nunca #000), texto creme, mostarda só em número/CTA/ativo.
+   Medido: mostarda #d4a017 = 8,29:1 sobre o fundo (AA até em texto pequeno). */
+@theme {
+  --color-bg: #0b0b09;
+  --color-surface: #14130e;
+  --color-surface-2: #1c1a13;
+  --color-border: #2a2618;
+  --color-line: #201d14;
+  --color-text: #ece7d9;
+  --color-muted: #9c9583;
+  --color-faint: #6b6555;
+  --color-accent: #d4a017;
+  --color-accent-hi: #e9bc4a;
+
+  --font-display: var(--fonte-display), Georgia, serif;
+  --font-sans: var(--fonte-sans), system-ui, sans-serif;
+  --font-mono: var(--fonte-mono), ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: #0b0b09;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Números que alinham em coluna. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Âncoras não somem atrás do nav fixo. */
+[id] {
+  scroll-margin-top: 5.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
