@@ -253,6 +253,7 @@ export function PalcoSobre() {
               pin: true,
               anticipatePin: 1,
               fastScrollEnd: true,
+              preventOverlaps: true,
               invalidateOnRefresh: true,
               snap: { snapTo: "labels", duration: 0.4, ease: "power1.inOut" },
             },
@@ -373,10 +374,12 @@ export function PalcoSobre() {
             );
           }
 
-          // O "Sobre mim (&) minha jornada" fica FIXO durante toda a seção
-          // (só some no finalzinho, quando o último capítulo vai embora).
+          // O "Sobre mim (&) minha jornada" fica visível por quase toda a
+          // seção e some DURANTE o último capítulo — totalmente apagado bem
+          // antes do fim do pin (senão pode piscar sobre os projetos ao
+          // despinar em rolagem rápida).
           if (header) {
-            tl.to(header, { autoAlpha: 0, y: -36, duration: 0.4 }, TOTAL - 0.3);
+            tl.to(header, { autoAlpha: 0, y: -36, duration: 0.5 }, EXIT + caps - 1);
           }
 
           cards.forEach((el, i) => {

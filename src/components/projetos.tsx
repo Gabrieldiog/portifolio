@@ -49,6 +49,8 @@ export function Projetos() {
               scrub: 1,
               pin: true,
               anticipatePin: 1,
+              fastScrollEnd: true,
+              preventOverlaps: true,
               invalidateOnRefresh: true,
             },
           });
