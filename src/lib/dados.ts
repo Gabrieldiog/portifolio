@@ -17,7 +17,7 @@ export const contato = {
 // Palavras que trocam no título do hero.
 export const palavrasHero = ["resolver", "entregar", "simplificar", "automatizar"];
 
-export const chipsPerfil = ["Tranquilo", "Resolvedor", "Back-end", "Front-end", "Autônomo"];
+export const chipsPerfil = ["Full Stack", "Calmo", "Companheiro", "Extrovertido", "Autônomo", "Resolvedor"];
 
 // ── Minha história (a seção pinada, capítulo a capítulo) ────────────────────
 export type Capitulo = {
@@ -61,7 +61,7 @@ export const historia: Capitulo[] = [
     marcador: "Hoje",
     titulo: "Eu guio a tecnologia, não o contrário",
     texto:
-      "Hoje a IA acelera meu trabalho, mas não substitui o conhecimento: eu guio, ela executa junto. Sou apaixonado por tecnologia e sempre vou ser.",
+      "Hoje a IA acelera meu trabalho, mas não substitui o conhecimento: eu guio, ela executa junto. Faço code review, sigo fazendo cursos pra aprender sempre mais e, na faculdade, escrevo o código com a própria mão. Sou apaixonado por tecnologia e sempre vou ser.",
   },
 ];
 
@@ -128,6 +128,7 @@ export const sistemas: Sistema[] = [
     metricaRotulo: "criadores de conteúdo usando na precificação",
     papel: "Full stack · produto",
     stack: ["Node.js", "TypeScript", "SQL"],
+    link: "https://calculadoradocreator.com",
   },
 ];
 
@@ -161,6 +162,15 @@ export const projetos: Projeto[] = [
     link: "https://fox-finance.vercel.app",
     repo: "https://github.com/Gabrieldiog/FOX-finance",
     imagem: "/projetos/fox.png",
+  },
+  {
+    id: "calculadora",
+    nome: "Calculadora do Creator",
+    descricao:
+      "A calculadora que ajuda criadores de conteúdo a precificar e planejar serviços, feita com o Conteúdo Club. Mais de 100 criadores usando.",
+    stack: ["Node.js", "TypeScript", "SQL"],
+    link: "https://calculadoradocreator.com",
+    imagem: "/projetos/calculadora.png",
   },
   {
     id: "balcao",
@@ -205,12 +215,20 @@ export const projetos: Projeto[] = [
 ];
 
 // ── Trajetória profissional ─────────────────────────────────────────────────
+// Soma honesta de quem usa o que construí: 55 (gestão ASSEGO) + 40 (GPol)
+// + 10 (clube e pousada) + 100+ (calculadora) + 200+ (totem) = 400+.
+export const alcanceTotal = {
+  valor: "400+",
+  rotulo: "pessoas usam ou já usaram sistemas que construí",
+};
+
 export type Trabalho = {
   org: string;
   site?: string;
   cargo: string;
   periodo: string;
-  resumo: string;
+  feitos: string[];
+  nota?: string;
 };
 
 export const trajetoria: Trabalho[] = [
@@ -219,31 +237,47 @@ export const trajetoria: Trabalho[] = [
     site: "https://www.assego.com.br/",
     cargo: "Desenvolvedor Full Stack Júnior",
     periodo: "fev/2025 · atual",
-    resumo:
-      "Sistema de gestão com 14+ módulos e 55 usuários, o GPol, sistema de ouvidoria, sistemas de clube e pousada e o projeto Bombeiro Mirim.",
+    feitos: [
+      "Sistema de gestão administrativa com 14+ módulos (financeiro, jurídico, comercial e mais), substituindo o legado: 55 usuários, 30+ todo dia",
+      "GPol, plataforma de inteligência política em tempo real usada por 40 pessoas em Goiás e no Ceará",
+      "Dois sistemas de gestão e agendamento, do clube e da pousada, usados por 10 colaboradores",
+      "Sistema de ouvidoria completo, do levantamento de requisitos aos testes",
+      "Sistema do projeto Bombeiro Mirim, do cadastro à gestão administrativa",
+      "Apoio à configuração dos servidores de tudo isso",
+    ],
+    nota: "Sistemas internos: rodam na rede da associação, sem landing page pra visitar. A prova são os 105+ usuários todo dia.",
   },
   {
     org: "IHGG",
     site: "https://ihgg.org/",
     cargo: "Arquiteto e Desenvolvedor de Software",
     periodo: "out/2025 · jan/2026",
-    resumo:
-      "Totem interativo touchscreen exposto em Brasília, incluindo a modelagem da base de dados.",
+    feitos: [
+      "Arquitetura e desenvolvimento do totem interativo touchscreen exposto em Brasília",
+      "Modelagem completa da base de dados do acervo histórico",
+      "Consulta a jornais históricos sobre Goiás e Brasília, usada por 200+ visitantes",
+    ],
+    nota: "É um totem físico: o link é ir até ele em Brasília.",
   },
   {
     org: "Conteúdo Club",
     site: "https://conteudoclub.com/",
     cargo: "Desenvolvedor Full Stack",
     periodo: "jun/2023 · jan/2026",
-    resumo:
-      "Calculadora usada por 100+ criadores, com participação ativa nas decisões técnicas e de produto.",
+    feitos: [
+      "Calculadora do Creator: precificação e planejamento de serviços pra 100+ criadores de conteúdo",
+      "Participação ativa nas decisões técnicas e de produto",
+    ],
   },
   {
     org: "Fazenda Nova · GO (freelancer)",
     cargo: "Desenvolvedor Full Stack",
     periodo: "mar/2024 · abr/2025",
-    resumo:
-      "Sistema de gestão rural: controle de estoque, financeiro e o valor da arroba do gado em tempo real.",
+    feitos: [
+      "Sistema de gestão rural: controle de estoque, financeiro e o valor da arroba do gado em tempo real",
+      "Apoio a decisões operacionais e estratégicas da fazenda",
+    ],
+    nota: "Sistema interno da fazenda, sem página pública.",
   },
 ];
 

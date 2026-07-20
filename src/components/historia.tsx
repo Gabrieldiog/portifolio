@@ -81,11 +81,12 @@ export function Historia() {
             tl.to(header, { opacity: 0, y: -36, duration: 0.45 }, 0.1);
           }
 
-          // Card sai pela diagonal (cima/direita), o próximo entra por ela.
+          // Transição sequenciada: o card SAI por inteiro, a trilha respira
+          // sozinha um instante, e só então o próximo ENTRA pela diagonal.
           cards.forEach((el, i) => {
             if (i > 0) {
-              tl.to(cards[i - 1], { opacity: 0, x: 110, y: -90, duration: 1 }, i - 1);
-              tl.to(el, { opacity: 1, x: 0, y: 0, duration: 1 }, i - 1);
+              tl.to(cards[i - 1], { opacity: 0, x: 110, y: -90, duration: 0.38 }, i - 1);
+              tl.to(el, { opacity: 1, x: 0, y: 0, duration: 0.38 }, i - 0.38);
             }
             tl.addLabel(`cap-${i}`, i);
           });
@@ -127,8 +128,8 @@ export function Historia() {
             </div>
             <span aria-hidden className="h-8 w-px bg-border" />
             <div>
-              <p className="font-display text-2xl font-semibold text-accent tnum">4</p>
-              <p className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-muted">empresas</p>
+              <p className="font-display text-2xl font-semibold text-accent tnum">7</p>
+              <p className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-muted">sistemas no ar</p>
             </div>
           </div>
 
@@ -195,18 +196,26 @@ export function Historia() {
             preserveAspectRatio="none"
             className="pointer-events-none absolute inset-0 z-0 hidden h-full w-full min-[900px]:block"
           >
-            {/* Sem vector-effect: com ele o tracejado vira espaço de tela e o
-                pathLength normalizado (100) deixa de valer. */}
+            {/* A trilha completa fica sempre visível (apagada) e o progresso
+                acende por cima. Sem vector-effect: com ele o tracejado vira
+                espaço de tela e o pathLength normalizado (100) deixa de valer. */}
+            <path
+              d="M -4 108 C 30 96, 40 78, 50 50 S 72 12, 104 -6"
+              fill="none"
+              stroke="var(--color-accent)"
+              strokeOpacity="0.16"
+              strokeWidth="0.4"
+            />
             <path
               ref={linhaRef}
               d="M -4 108 C 30 96, 40 78, 50 50 S 72 12, 104 -6"
               pathLength={100}
               fill="none"
               stroke="var(--color-accent)"
-              strokeOpacity="0.5"
-              strokeWidth="0.35"
+              strokeOpacity="0.9"
+              strokeWidth="0.55"
             />
-            <circle ref={pontoRef} r="5" fill="var(--color-accent)" stroke="var(--color-bg)" strokeWidth="2" />
+            <circle ref={pontoRef} r="1.1" fill="var(--color-accent)" stroke="var(--color-bg)" strokeWidth="0.4" />
           </svg>
 
           {/* Sem JS / mobile / reduced-motion: cards empilhados. */}

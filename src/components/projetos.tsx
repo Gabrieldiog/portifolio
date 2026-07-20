@@ -74,9 +74,10 @@ export function Projetos() {
               clicável.
             </h2>
           </div>
-          <p className="max-w-sm leading-relaxed text-muted">
-            Do sistema profissional de inteligência política aos projetos
-            autorais: tudo aqui está no ar. Clica no card e usa.
+          <p className="max-w-sm text-lg font-medium leading-snug text-text md:text-xl">
+            Do sistema profissional aos projetos autorais:{" "}
+            <span className="text-accent">tudo aqui está no ar.</span> Clica no
+            card e usa.
           </p>
         </header>
       </div>

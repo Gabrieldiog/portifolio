@@ -124,12 +124,12 @@ export function Sistemas() {
       className="relative isolate overflow-hidden border-t border-line bg-surface/40"
     >
       <div className="pointer-events-none absolute left-6 top-10 z-10 md:left-14">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
+        <p className="inline-block rounded-full border border-accent/40 px-4 py-1.5 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-accent">
           Sistemas em produção
         </p>
-        <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted">
-          Alguns são internos, sem link pra visitar. O que mostra o valor é quem
-          usa do outro lado: o número é a prova.
+        <p className="mt-3 max-w-sm text-lg font-medium leading-snug text-text">
+          Alguns são internos, sem link pra visitar.{" "}
+          <span className="text-accent">O número é a prova.</span>
         </p>
       </div>
 
@@ -162,53 +162,54 @@ export function Sistemas() {
             ref={(el) => {
               panelRefs.current[i] = el;
             }}
-            className="flex min-h-screen flex-col justify-center gap-6 px-6 py-24 md:px-14"
+            className="flex min-h-screen flex-col items-center justify-center px-6 py-24 md:px-14"
           >
-            <div>
-              <p className="font-display text-[clamp(4rem,14vw,10rem)] font-bold leading-none text-accent tnum">
+            {/* O sistema vive num CARD, como os capítulos da história. */}
+            <div className="w-full max-w-2xl rounded-3xl border border-border bg-surface-2/90 p-7 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.8)] backdrop-blur-sm md:p-10">
+              <p className="font-display text-7xl font-bold leading-none text-accent tnum md:text-8xl">
                 <span className="contador" data-valor={s.metricaValor} data-sufixo={s.metricaSufixo}>
                   {fmt.format(s.metricaValor)}
                   {s.metricaSufixo}
                 </span>
               </p>
-              <p className="mt-2 max-w-sm font-mono text-[0.72rem] uppercase leading-relaxed tracking-[0.1em] text-muted">
+              <p className="mt-3 max-w-sm font-mono text-[0.72rem] uppercase leading-relaxed tracking-[0.1em] text-muted">
                 {s.metricaRotulo}
               </p>
-            </div>
 
-            <div className="max-w-2xl">
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <h3 className="font-display text-2xl font-semibold md:text-3xl">{s.nome}</h3>
-                <span className="font-mono text-xs uppercase tracking-[0.14em] text-faint">
-                  {s.tagline}
-                </span>
-              </div>
-              <p className="mt-4 leading-relaxed text-muted">{s.descricao}</p>
-              <ul className="mt-5 flex flex-wrap gap-2">
-                {s.stack.map((t) => (
-                  <li
-                    key={t}
-                    className="rounded border border-border bg-surface px-2.5 py-1 font-mono text-[0.7rem] text-muted"
-                  >
-                    {t}
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-                <span className="text-faint">{s.papel}</span>
-                {s.link && (
-                  <a
-                    href={s.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group inline-flex items-center gap-1.5 font-medium text-accent transition-colors hover:text-accent-hi"
-                  >
-                    Ver ao vivo
-                    <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
-                      →
-                    </span>
-                  </a>
-                )}
+              <div className="mt-7 border-t border-border pt-6">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <h3 className="font-display text-2xl font-semibold md:text-3xl">{s.nome}</h3>
+                  <span className="font-mono text-xs uppercase tracking-[0.14em] text-faint">
+                    {s.tagline}
+                  </span>
+                </div>
+                <p className="mt-4 leading-relaxed text-muted">{s.descricao}</p>
+                <ul className="mt-5 flex flex-wrap gap-2">
+                  {s.stack.map((t) => (
+                    <li
+                      key={t}
+                      className="rounded border border-border bg-surface px-2.5 py-1 font-mono text-[0.7rem] text-muted"
+                    >
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+                  <span className="text-faint">{s.papel}</span>
+                  {s.link && (
+                    <a
+                      href={s.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group inline-flex items-center gap-1.5 font-medium text-accent transition-colors hover:text-accent-hi"
+                    >
+                      Ver ao vivo
+                      <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
+                        →
+                      </span>
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           </li>

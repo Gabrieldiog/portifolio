@@ -7,26 +7,30 @@ import { perfil, chipsPerfil, palavrasHero } from "@/lib/dados";
 import { WordRotator } from "@/components/word-rotator";
 import { useMagnetic } from "@/hooks/use-magnetic";
 
-const NOME = perfil.nomeGigante;
+const NOME = perfil.nomeGigante; // GABRIEL
+const APELIDO = "DIOGO";
 
-const stats = [
-  { valor: "3+", rotulo: "anos de experiência" },
-  { valor: "4", rotulo: "empresas atendidas" },
-];
+// Dourado de verdade no nome: base apagada + camada acesa pelo holofote.
+const OURO_BASE = "#a4780a";
+const OURO_ACESO = "#ffd24a";
+
+const stats = [{ valor: "3+", rotulo: "anos de experiência" }, { valor: "7", rotulo: "sistemas no ar" }];
 
 export function Hero() {
   const root = useRef<HTMLElement>(null);
   const nomeRef = useRef<SVGSVGElement>(null);
+  const textoBaseRef = useRef<SVGTextElement>(null);
+  const textoAcesoRef = useRef<SVGTextElement>(null);
   const fotoRef = useRef<HTMLDivElement>(null);
   const spotRef = useRef<SVGCircleElement>(null);
   const ctaRef = useMagnetic<HTMLAnchorElement>();
+  const cta2Ref = useMagnetic<HTMLAnchorElement>();
 
-  // O palco reage ao mouse: holofote acende as letras perto do cursor,
-  // nome e foto se movem em profundidades opostas, cards com parallax.
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
 
+      // ── Mouse-play: holofote, profundidade e parallax ──────────────────
       mm.add(
         {
           play: "(min-width: 768px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)",
@@ -37,16 +41,15 @@ export function Hero() {
           const spot = spotRef.current;
 
           if (!play) {
-            // Sem mouse: holofote parado no centro do nome.
             if (spot) gsap.set(spot, { x: 500, y: 130 });
             return;
           }
 
-          const cards = gsap.utils.toArray<HTMLElement>(".stat-card", root.current);
-          const movers = cards.map((card) => ({
-            x: gsap.quickTo(card, "x", { duration: 0.6, ease: "power3.out" }),
-            y: gsap.quickTo(card, "y", { duration: 0.6, ease: "power3.out" }),
-            depth: Number(card.dataset.depth ?? "1"),
+          const flutuantes = gsap.utils.toArray<HTMLElement>("[data-depth]", root.current);
+          const movers = flutuantes.map((el) => ({
+            x: gsap.quickTo(el, "x", { duration: 0.6, ease: "power3.out" }),
+            y: gsap.quickTo(el, "y", { duration: 0.6, ease: "power3.out" }),
+            depth: Number(el.dataset.depth ?? "1"),
           }));
 
           const nome = nomeRef.current;
@@ -66,14 +69,11 @@ export function Hero() {
               m.x(relX * 26 * m.depth);
               m.y(relY * 26 * m.depth);
             });
-
-            // Profundidade: a foto acompanha o mouse, o nome vai contra.
             fotoX?.(relX * 16);
             fotoY?.(relY * 10);
             nomeX?.(relX * -10);
             nomeY?.(relY * -6);
 
-            // Holofote: cursor em coordenadas do viewBox do SVG.
             if (nome && spotX && spotY) {
               const r = nome.getBoundingClientRect();
               spotX(((e.clientX - r.left) / r.width) * 1000);
@@ -86,6 +86,66 @@ export function Hero() {
         },
       );
 
+      // ── Morph do nome: GABRIEL vira DIOGO letra a letra, e volta ───────
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const alvos = [textoBaseRef.current, textoAcesoRef.current];
+        const driver = document.createElement("span");
+        driver.textContent = NOME;
+        const aplicar = () => {
+          alvos.forEach((t) => {
+            if (t) t.textContent = driver.textContent;
+          });
+        };
+
+        const tl = gsap.timeline({ repeat: -1, delay: 4.5, repeatDelay: 5 });
+        tl.to(driver, {
+          duration: 1.1,
+          scrambleText: { text: APELIDO, chars: "upperCase", speed: 0.35 },
+          onUpdate: aplicar,
+        }).to(
+          driver,
+          {
+            duration: 1.1,
+            scrambleText: { text: NOME, chars: "upperCase", speed: 0.35 },
+            onUpdate: aplicar,
+          },
+          "+=2.2",
+        );
+
+        return () => {
+          tl.kill();
+          driver.textContent = NOME;
+          aplicar();
+        };
+      });
+
+      // ── Saída no scroll: o palco se recolhe pro canto esquerdo ─────────
+      mm.add(
+        "(min-width: 900px) and (prefers-reduced-motion: no-preference)",
+        () => {
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: root.current,
+              start: "top top",
+              end: "bottom 30%",
+              scrub: 0.8,
+            },
+          });
+          tl.to(nomeRef.current, { scale: 0.32, transformOrigin: "left top", ease: "none" }, 0)
+            .to(fotoRef.current, { xPercent: -8, yPercent: 14, opacity: 0, ease: "none" }, 0)
+            .to(
+              gsap.utils.toArray<HTMLElement>("[data-depth]", root.current),
+              { x: -180, opacity: 0, stagger: 0.06, ease: "none" },
+              0,
+            )
+            .to(
+              gsap.utils.toArray<HTMLElement>(".hero-solto", root.current),
+              { x: -60, opacity: 0, stagger: 0.05, ease: "none" },
+              0.1,
+            );
+        },
+      );
+
       return () => mm.revert();
     },
     { scope: root },
@@ -95,8 +155,7 @@ export function Hero() {
     <section ref={root} id="topo" className="relative w-full overflow-hidden pb-16 pt-6 md:pt-10">
       <div className="relative mx-auto w-full max-w-[1500px] px-3 md:px-6">
         <div className="relative mx-auto w-full">
-          {/* Nome gigante: base apagada + camada acesa recortada pelo holofote
-              que segue o cursor. O texto estica até as duas bordas (textLength). */}
+          {/* Nome gigante dourado: base apagada + camada acesa pelo holofote. */}
           <svg
             ref={nomeRef}
             viewBox="0 0 1000 250"
@@ -114,28 +173,29 @@ export function Hero() {
               </mask>
             </defs>
             <text
+              ref={textoBaseRef}
               x="0"
               y="205"
               textLength="1000"
               lengthAdjust="spacingAndGlyphs"
-              style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 245, fill: "#8f6d10" }}
+              style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 245, fill: OURO_BASE }}
             >
               {NOME}
             </text>
             <text
+              ref={textoAcesoRef}
               x="0"
               y="205"
               textLength="1000"
               lengthAdjust="spacingAndGlyphs"
               mask="url(#holofote)"
-              style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 245, fill: "#efc93f" }}
+              style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 245, fill: OURO_ACESO }}
             >
               {NOME}
             </text>
           </svg>
 
-          {/* Foto GRANDE na frente do nome: a cabeça passa do topo das letras e
-              o corpo desce cruzando a nav, como na referência. */}
+          {/* Foto no CENTRO, na frente do nome, cruzando a nav. */}
           <div
             ref={fotoRef}
             className="pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 aspect-[1122/1402]"
@@ -146,13 +206,12 @@ export function Hero() {
               alt=""
               fill
               priority
-              sizes="(max-width: 768px) 60vw, 42vw"
+              sizes="(max-width: 768px) 60vw, 44vw"
               className="object-contain"
               onLoad={() => ScrollTrigger.refresh()}
             />
           </div>
 
-          {/* Heading real pra leitores de tela e SEO; o SVG acima é decorativo. */}
           <h1 className="sr-only">
             {perfil.nomeCompleto}, desenvolvedor full stack em {perfil.local}
           </h1>
@@ -160,17 +219,17 @@ export function Hero() {
 
           {/* Stat-cards flutuando sobre o nome, com parallax. */}
           <div className="pointer-events-none absolute inset-0 z-20 hidden md:block" aria-hidden>
-            <div className="stat-card absolute left-[3%] top-[62%]" data-depth="1.4">
+            <div className="absolute left-[3%] top-[62%]" data-depth="1.4">
               <StatCard valor={stats[0].valor} rotulo={stats[0].rotulo} />
             </div>
-            <div className="stat-card absolute right-[3%] top-[8%]" data-depth="0.8">
+            <div className="absolute right-[3%] top-[8%]" data-depth="0.8">
               <StatCard valor={stats[1].valor} rotulo={stats[1].rotulo} />
             </div>
           </div>
         </div>
 
         {/* Nav dividida em dois grupos, desviando da foto no centro. */}
-        <nav className="relative z-20 mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 font-mono text-[0.7rem] uppercase tracking-[0.18em]">
+        <nav className="hero-solto relative z-20 mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 font-mono text-[0.7rem] uppercase tracking-[0.18em]">
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             <a href="#historia" className="inline-block py-2 text-muted transition-colors hover:text-accent">
               Sobre mim
@@ -192,8 +251,8 @@ export function Hero() {
           </div>
         </nav>
 
-        {/* Headline no peito da foto, centrada (como a referência). */}
-        <div className="relative z-20 mx-auto mt-6 flex max-w-3xl flex-col items-center text-center md:mt-2">
+        {/* Headline no peito da foto, centrada. */}
+        <div className="hero-solto relative z-20 mx-auto mt-6 flex max-w-3xl flex-col items-center text-center md:mt-2">
           <h2 className="font-display text-[clamp(2rem,5.2vw,3.9rem)] font-bold leading-[1.03] tracking-tight">
             Pego um problema e<br />
             não paro até{" "}
@@ -208,8 +267,9 @@ export function Hero() {
               Falar comigo
             </a>
             <a
+              ref={cta2Ref}
               href="#historia"
-              className="rounded-full border border-border bg-bg/70 px-7 py-3.5 font-medium text-text backdrop-blur-sm transition-colors hover:border-accent hover:text-accent"
+              className="inline-block rounded-full border border-border bg-bg/70 px-7 py-3.5 font-medium text-text backdrop-blur-sm transition-colors hover:border-accent hover:text-accent"
             >
               Minha história
             </a>
@@ -217,16 +277,15 @@ export function Hero() {
         </div>
 
         {/* Rodapé do palco: tese à esquerda, chips à direita. */}
-        <div className="relative z-20 mt-12 flex flex-col justify-between gap-8 md:flex-row md:items-end">
+        <div className="hero-solto relative z-20 mt-12 flex flex-col justify-between gap-8 md:flex-row md:items-end">
           <div className="max-w-sm">
             <p className="text-lg font-medium leading-snug">
-              Full stack de verdade.<br />
-              <span className="text-muted">Esse é o Gabriel.</span>
+              Calmo no processo,<br />
+              <span className="text-accent">certeiro na entrega.</span>
             </p>
             <p className="mt-3 text-sm leading-relaxed text-muted">
-              {perfil.cargo} em {perfil.local}. Tranquilo no jeito, teimoso no
-              problema: construo sistemas de ponta a ponta que gente de verdade
-              usa todo dia.
+              {perfil.cargo} em {perfil.local}. Construo sistemas de ponta a
+              ponta que gente de verdade usa todo dia.
             </p>
           </div>
 
@@ -234,7 +293,7 @@ export function Hero() {
             {chipsPerfil.map((chip) => (
               <li
                 key={chip}
-                className="rounded-full border border-accent/35 px-4 py-1.5 font-mono text-[0.7rem] uppercase tracking-[0.12em] text-accent"
+                className="rounded-full border border-accent/35 px-4 py-1.5 font-mono text-[0.7rem] uppercase tracking-[0.12em] text-accent transition-colors hover:bg-accent/10"
               >
                 {chip}
               </li>
