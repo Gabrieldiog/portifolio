@@ -11,10 +11,10 @@ const NOME = perfil.nomeGigante; // GABRIEL
 const APELIDO = "DIOGO";
 
 // Dourado de verdade no nome: base apagada + camada acesa pelo holofote.
-const OURO_BASE = "#a4780a";
-const OURO_ACESO = "#ffd24a";
+const OURO_BASE = "#c99a12";
+const OURO_ACESO = "#ffdd66";
 
-const stats = [{ valor: "3+", rotulo: "anos de experiência" }, { valor: "7", rotulo: "sistemas no ar" }];
+const stats = [{ valor: "3+", rotulo: "anos de experiência" }, { valor: "15+", rotulo: "sistemas construídos" }];
 
 export function Hero() {
   const root = useRef<HTMLElement>(null);
@@ -95,21 +95,25 @@ export function Hero() {
           alvos.forEach((t) => {
             if (t) t.textContent = driver.textContent;
           });
+          // O card da sidebar (e quem mais quiser) acompanha o morph.
+          window.dispatchEvent(
+            new CustomEvent("nome-morph", { detail: driver.textContent ?? "" }),
+          );
         };
 
-        const tl = gsap.timeline({ repeat: -1, delay: 4.5, repeatDelay: 5 });
+        const tl = gsap.timeline({ repeat: -1, delay: 5, repeatDelay: 6.5 });
         tl.to(driver, {
-          duration: 1.1,
-          scrambleText: { text: APELIDO, chars: "upperCase", speed: 0.35 },
+          duration: 1.9,
+          scrambleText: { text: APELIDO, chars: "upperCase", speed: 0.28 },
           onUpdate: aplicar,
         }).to(
           driver,
           {
-            duration: 1.1,
-            scrambleText: { text: NOME, chars: "upperCase", speed: 0.35 },
+            duration: 1.9,
+            scrambleText: { text: NOME, chars: "upperCase", speed: 0.28 },
             onUpdate: aplicar,
           },
-          "+=2.2",
+          "+=3.2",
         );
 
         return () => {
@@ -131,17 +135,21 @@ export function Hero() {
               scrub: 0.8,
             },
           });
-          tl.to(nomeRef.current, { scale: 0.32, transformOrigin: "left top", ease: "none" }, 0)
-            .to(fotoRef.current, { xPercent: -8, yPercent: 14, opacity: 0, ease: "none" }, 0)
+          tl.to(
+            nomeRef.current,
+            { scale: 0.3, y: 170, transformOrigin: "left bottom", ease: "none" },
+            0,
+          )
+            .to(fotoRef.current, { xPercent: -10, yPercent: 22, opacity: 0, ease: "none" }, 0)
             .to(
               gsap.utils.toArray<HTMLElement>("[data-depth]", root.current),
-              { x: -180, opacity: 0, stagger: 0.06, ease: "none" },
+              { x: -200, y: 190, opacity: 0, stagger: 0.06, ease: "none" },
               0,
             )
             .to(
               gsap.utils.toArray<HTMLElement>(".hero-solto", root.current),
-              { x: -60, opacity: 0, stagger: 0.05, ease: "none" },
-              0.1,
+              { x: -80, y: 60, opacity: 0, stagger: 0.05, ease: "none" },
+              0.08,
             );
         },
       );
@@ -198,8 +206,8 @@ export function Hero() {
           {/* Foto no CENTRO, na frente do nome, cruzando a nav. */}
           <div
             ref={fotoRef}
-            className="pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 aspect-[1122/1402]"
-            style={{ width: "clamp(240px, 44%, 660px)", top: "-30%" }}
+            className="pointer-events-none absolute left-1/2 z-10 aspect-[1122/1402]"
+            style={{ width: "clamp(240px, 44%, 660px)", top: "-30%", transform: "translateX(-45.2%)" }}
           >
             <Image
               src="/fotominha.png"
@@ -233,9 +241,6 @@ export function Hero() {
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             <a href="#historia" className="inline-block py-2 text-muted transition-colors hover:text-accent">
               Sobre mim
-            </a>
-            <a href="#sistemas" className="inline-block py-2 text-muted transition-colors hover:text-accent">
-              Sistemas
             </a>
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-2">

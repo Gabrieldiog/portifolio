@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { historia, contato } from "@/lib/dados";
 
@@ -15,7 +15,18 @@ export function Historia() {
   const linhaRef = useRef<SVGPathElement>(null);
   const pontoRef = useRef<SVGCircleElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLSpanElement>(null);
   const menuAtivoRef = useRef<HTMLSpanElement>(null);
+
+  // O logo da sidebar acompanha o morph GABRIEL/DIOGO do hero.
+  useEffect(() => {
+    const onMorph = (e: Event) => {
+      const texto = (e as CustomEvent<string>).detail;
+      if (logoRef.current && texto) logoRef.current.textContent = `${texto}®`;
+    };
+    window.addEventListener("nome-morph", onMorph);
+    return () => window.removeEventListener("nome-morph", onMorph);
+  }, []);
 
   useGSAP(
     () => {
@@ -32,6 +43,21 @@ export function Historia() {
             reduceMotion: boolean;
           };
           if (!isDesktop || reduceMotion) return;
+
+          // A sidebar chega junto com o que desceu do hero.
+          gsap.from(".hist-sidebar > *", {
+            opacity: 0,
+            y: -46,
+            x: -30,
+            duration: 0.6,
+            ease: "power3.out",
+            stagger: 0.08,
+            scrollTrigger: {
+              trigger: containerRef.current,
+              start: "top 55%",
+              once: true,
+            },
+          });
 
           const cards = cardRefs.current.filter((el): el is HTMLLIElement => el !== null);
           if (cards.length < 2) return;
@@ -103,7 +129,7 @@ export function Historia() {
       ref={containerRef}
       id="historia"
       aria-label="Minha história"
-      className="relative isolate overflow-hidden border-t border-line bg-surface/30"
+      className="relative isolate overflow-hidden"
     >
       <p className="absolute left-6 top-8 z-10 font-mono text-xs uppercase tracking-[0.2em] text-accent min-[900px]:hidden">
         Minha história
@@ -111,9 +137,12 @@ export function Historia() {
 
       <div className="mx-auto grid min-h-screen w-full max-w-[1500px] items-center gap-10 px-6 py-20 min-[900px]:grid-cols-[300px_1fr] min-[900px]:px-10 min-[900px]:py-0">
         {/* Sidebar: quem está contando a história. */}
-        <aside className="hidden flex-col gap-3 min-[900px]:flex" aria-label="Resumo e navegação">
+        <aside className="hist-sidebar hidden flex-col gap-3 min-[900px]:flex" aria-label="Resumo e navegação">
           <div className="rounded-2xl border border-border bg-surface p-5">
-            <span className="inline-block rounded-lg bg-accent px-3 py-1 font-display text-sm font-bold text-bg">
+            <span
+              ref={logoRef}
+              className="inline-block rounded-lg bg-accent px-3 py-1 font-display text-sm font-bold text-bg"
+            >
               GABRIEL®
             </span>
             <p className="mt-3 text-sm leading-relaxed text-muted">
@@ -128,8 +157,8 @@ export function Historia() {
             </div>
             <span aria-hidden className="h-8 w-px bg-border" />
             <div>
-              <p className="font-display text-2xl font-semibold text-accent tnum">7</p>
-              <p className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-muted">sistemas no ar</p>
+              <p className="font-display text-2xl font-semibold text-accent tnum">15+</p>
+              <p className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-muted">sistemas construídos</p>
             </div>
           </div>
 
@@ -144,11 +173,6 @@ export function Historia() {
                 <span ref={menuAtivoRef} className="block rounded-lg bg-accent px-3 py-2 text-sm font-medium text-bg">
                   Sobre mim
                 </span>
-              </li>
-              <li>
-                <a href="#sistemas" className="block rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-2 hover:text-text">
-                  Sistemas
-                </a>
               </li>
               <li>
                 <a href="#projetos" className="block rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-2 hover:text-text">

@@ -17,7 +17,7 @@ export const contato = {
 // Palavras que trocam no título do hero.
 export const palavrasHero = ["resolver", "entregar", "simplificar", "automatizar"];
 
-export const chipsPerfil = ["Full Stack", "Calmo", "Companheiro", "Extrovertido", "Autônomo", "Resolvedor"];
+export const chipsPerfil = ["Full Stack", "APIs REST", "TDD & Code Review", "Calmo", "Companheiro", "Extrovertido", "Curioso", "Autônomo", "Mão na massa", "Resolvedor"];
 
 // ── Minha história (a seção pinada, capítulo a capítulo) ────────────────────
 export type Capitulo = {
@@ -52,10 +52,10 @@ export const historia: Capitulo[] = [
       "Escolhi Engenharia de Software e amo o que estudo. Levo a faculdade a sério e ela me devolve base pra construir melhor.",
   },
   {
-    marcador: "Autonomia",
-    titulo: "Confiança pra dirigir projetos",
+    marcador: "Confiança",
+    titulo: "O dev que soluciona, e em quem confiam",
     texto:
-      "Nos trabalhos por onde passei, os diretores confiaram na minha autonomia. Ainda júnior, já dirigi dois projetos do início ao fim. Meu padrão é sempre o mesmo: entender a dor de quem usa e resolver.",
+      "Virei a pessoa que chamam quando tem problema pra resolver. Os diretores confiaram na minha autonomia e, ainda júnior, dirigi dois projetos do início ao fim. Entender a dor de quem usa e resolver virou o meu padrão.",
   },
   {
     marcador: "Hoje",
@@ -127,7 +127,7 @@ export const sistemas: Sistema[] = [
     metricaSufixo: "+",
     metricaRotulo: "criadores de conteúdo usando na precificação",
     papel: "Full stack · produto",
-    stack: ["Node.js", "TypeScript", "SQL"],
+    stack: ["Vue.js", "Node.js", "SQL"],
     link: "https://calculadoradocreator.com",
   },
 ];
@@ -161,14 +161,14 @@ export const projetos: Projeto[] = [
     stack: ["Next.js", "TypeScript", "PostgreSQL", "Drizzle"],
     link: "https://fox-finance.vercel.app",
     repo: "https://github.com/Gabrieldiog/FOX-finance",
-    imagem: "/projetos/fox.png",
+    imagem: "/projetos/fox-print.png",
   },
   {
     id: "calculadora",
     nome: "Calculadora do Creator",
     descricao:
       "A calculadora que ajuda criadores de conteúdo a precificar e planejar serviços, feita com o Conteúdo Club. Mais de 100 criadores usando.",
-    stack: ["Node.js", "TypeScript", "SQL"],
+    stack: ["Vue.js", "Node.js", "SQL"],
     link: "https://calculadoradocreator.com",
     imagem: "/projetos/calculadora.png",
   },
@@ -229,6 +229,7 @@ export type Trabalho = {
   periodo: string;
   feitos: string[];
   nota?: string;
+  metrica?: { valor: number; sufixo: string; rotulo: string };
 };
 
 export const trajetoria: Trabalho[] = [
@@ -243,9 +244,11 @@ export const trajetoria: Trabalho[] = [
       "Dois sistemas de gestão e agendamento, do clube e da pousada, usados por 10 colaboradores",
       "Sistema de ouvidoria completo, do levantamento de requisitos aos testes",
       "Sistema do projeto Bombeiro Mirim, do cadastro à gestão administrativa",
+      "Mais de 10 outros sistemas e APIs internas pra operação do dia a dia",
       "Apoio à configuração dos servidores de tudo isso",
     ],
     nota: "Sistemas internos: rodam na rede da associação, sem landing page pra visitar. A prova são os 105+ usuários todo dia.",
+    metrica: { valor: 15, sufixo: "+", rotulo: "sistemas e APIs construídos" },
   },
   {
     org: "IHGG",
@@ -258,6 +261,7 @@ export const trajetoria: Trabalho[] = [
       "Consulta a jornais históricos sobre Goiás e Brasília, usada por 200+ visitantes",
     ],
     nota: "É um totem físico: o link é ir até ele em Brasília.",
+    metrica: { valor: 200, sufixo: "+", rotulo: "visitantes no totem" },
   },
   {
     org: "Conteúdo Club",
@@ -268,6 +272,7 @@ export const trajetoria: Trabalho[] = [
       "Calculadora do Creator: precificação e planejamento de serviços pra 100+ criadores de conteúdo",
       "Participação ativa nas decisões técnicas e de produto",
     ],
+    metrica: { valor: 100, sufixo: "+", rotulo: "criadores usando a calculadora" },
   },
   {
     org: "Fazenda Nova · GO (freelancer)",

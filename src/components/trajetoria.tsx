@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { trajetoria, alcanceTotal, type Trabalho } from "@/lib/dados";
 import { useTilt } from "@/hooks/use-tilt";
+import { Contador } from "@/components/contador";
 
 // Onde meu código roda: coluna esquerda fixa com o número total e o porquê
 // de nem tudo ter link; à direita, um card por casa com tudo que construí.
@@ -50,8 +51,8 @@ export function Trajetoria() {
           </h2>
 
           <div className="mt-8 rounded-3xl border border-accent/30 bg-surface p-7">
-            <p className="font-display text-6xl font-bold leading-none text-accent tnum">
-              {alcanceTotal.valor}
+            <p className="font-display text-6xl font-bold leading-none text-accent-hi tnum">
+              <Contador valor={400} sufixo="+" />
             </p>
             <p className="mt-3 text-sm leading-relaxed text-text">{alcanceTotal.rotulo}</p>
           </div>
@@ -106,6 +107,18 @@ function CardTrabalho({ trabalho }: { trabalho: Trabalho }) {
         </p>
       </div>
       <p className="mt-1 text-sm text-muted">{trabalho.cargo}</p>
+
+      {/* O número da casa, subindo em amarelo brilhante. */}
+      {trabalho.metrica && (
+        <div className="mt-5 flex items-baseline gap-3">
+          <p className="font-display text-5xl font-bold leading-none text-accent-hi tnum md:text-6xl">
+            <Contador valor={trabalho.metrica.valor} sufixo={trabalho.metrica.sufixo} />
+          </p>
+          <p className="max-w-[12rem] font-mono text-[0.65rem] uppercase leading-snug tracking-[0.12em] text-muted">
+            {trabalho.metrica.rotulo}
+          </p>
+        </div>
+      )}
 
       <ul className="mt-5 flex flex-col gap-2.5">
         {trabalho.feitos.map((f) => (

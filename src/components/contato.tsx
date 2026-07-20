@@ -19,7 +19,7 @@ export function Contato() {
           Freelas e projetos também são bem-vindos. Me chama que a gente conversa.
         </p>
 
-        <div className="mt-10 grid gap-10 md:grid-cols-[1fr_auto] md:items-start">
+        <div className="mt-10 grid gap-10 md:grid-cols-[1fr_1.1fr] md:items-center">
           <div className="flex flex-col gap-6">
             <CopiarEmail />
             <div className="flex flex-wrap gap-x-8 gap-y-3 font-mono text-sm">
@@ -49,16 +49,17 @@ export function Contato() {
           </div>
 
           {/* Me conheça em 1 minuto: vídeo de apresentação (em breve). */}
-          <div className="w-full max-w-sm">
-            <div className="aspect-video w-full overflow-hidden rounded-2xl border border-border bg-surface">
-              <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
-                <span className="flex h-12 w-12 items-center justify-center rounded-full border border-accent/40 text-accent">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+          <div className="w-full">
+            <div className="aspect-video w-full overflow-hidden rounded-3xl border border-border bg-surface transition-colors hover:border-accent/50">
+              <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-accent text-bg">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 </span>
+                <p className="font-display text-lg font-semibold">Me conheça em 1 minuto</p>
                 <p className="font-mono text-xs uppercase tracking-[0.14em] text-faint">
-                  Me conheça em 1 minuto · em breve
+                  vídeo de apresentação · em breve
                 </p>
               </div>
             </div>

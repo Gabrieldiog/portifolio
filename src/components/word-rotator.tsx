@@ -33,7 +33,7 @@ export function WordRotator({ words, interval = 2.2, className }: WordRotatorPro
 
           if (reduce) return; // fica na primeira palavra
 
-          const tl = gsap.timeline({ repeat: 2 }); // 3 voltas e descansa
+          const tl = gsap.timeline({ repeat: -1 }); // contínuo (pausa sob o cursor)
           items.forEach((el, i) => {
             const next = items[(i + 1) % items.length];
             tl.to(el, { yPercent: -100, opacity: 0, duration: 0.5, ease: "power3.in" }, `+=${interval}`)

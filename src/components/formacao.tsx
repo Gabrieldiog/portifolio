@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { formacao, competencias } from "@/lib/dados";
+import { useTilt } from "@/hooks/use-tilt";
 
 // Formação, cursos, idiomas e o arsenal. Cards com hover e entrada em cascata.
 export function Formacao() {
@@ -47,7 +48,7 @@ export function Formacao() {
             <span className="text-accent">código escrito com a própria mão.</span>
           </p>
 
-          <div className="form-card mt-8 rounded-3xl border border-border bg-surface p-6 transition-colors hover:border-accent/50">
+          <CardTilt className="form-card mt-8 rounded-3xl border border-border bg-surface p-6 transition-colors hover:border-accent/50">
             <p className="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-faint">
               Graduação
             </p>
@@ -57,9 +58,9 @@ export function Formacao() {
             <p className="mt-1 text-sm text-muted">
               {formacao.graduacao.instituicao} · {formacao.graduacao.periodo}
             </p>
-          </div>
+          </CardTilt>
 
-          <div className="form-card mt-5 rounded-3xl border border-border bg-surface p-6 transition-colors hover:border-accent/50">
+          <CardTilt className="form-card mt-5 rounded-3xl border border-border bg-surface p-6 transition-colors hover:border-accent/50">
             <p className="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-faint">
               Cursos
             </p>
@@ -71,7 +72,7 @@ export function Formacao() {
                 </li>
               ))}
             </ul>
-          </div>
+          </CardTilt>
 
           <div className="form-card mt-5 flex flex-wrap gap-2">
             {formacao.idiomas.map((i) => (
@@ -111,5 +112,15 @@ export function Formacao() {
         </div>
       </div>
     </section>
+  );
+}
+
+// Card com tilt 3D leve no mouse.
+function CardTilt({ className, children }: { className?: string; children: React.ReactNode }) {
+  const ref = useTilt<HTMLDivElement>({ max: 4 });
+  return (
+    <div ref={ref} className={className}>
+      {children}
+    </div>
   );
 }
