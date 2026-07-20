@@ -41,7 +41,11 @@ export function PalcoSobre() {
   const fotoNitidaRef = useRef<HTMLDivElement>(null);
   const fotoBorradaRef = useRef<HTMLDivElement>(null);
   const spotRef = useRef<SVGCircleElement>(null);
-  const ctaRef = useMagnetic<HTMLAnchorElement>();
+  const nomeVooRef = useRef<HTMLDivElement>(null);
+  const fotoDriftRef = useRef<HTMLDivElement>(null);
+  const linhaSvgRef = useRef<SVGSVGElement>(null);
+  const olRef = useRef<HTMLOListElement>(null);
+  const ctaRef = useRef<HTMLAnchorElement>(null); // o voo cuida dele; imã só no cta2
   const cta2Ref = useMagnetic<HTMLAnchorElement>();
 
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -166,7 +170,7 @@ export function PalcoSobre() {
       // ── A timeline mestra do palco ─────────────────────────────────────
       mm.add(
         {
-          isDesktop: "(min-width: 900px)",
+          isDesktop: "(min-width: 900px) and (min-height: 800px)",
           reduceMotion: "(prefers-reduced-motion: reduce)",
         },
         (context) => {
@@ -201,6 +205,8 @@ export function PalcoSobre() {
           const TOTAL = EXIT + caps;
 
           // Estados iniciais da camada Sobre.
+          if (linhaSvgRef.current) gsap.set(linhaSvgRef.current, { autoAlpha: 0 });
+          if (olRef.current) gsap.set(olRef.current, { display: "block", height: "34rem" });
           gsap.set(cartoes, { autoAlpha: 0, y: 26 });
           if (header) gsap.set(header, { autoAlpha: 0, y: 40 });
           gsap.set(cards, { position: "absolute", inset: 0, margin: "auto" });
@@ -216,7 +222,7 @@ export function PalcoSobre() {
             y: () => {
               const t = alvoDe(sel);
               if (!fonte || !t) return 0;
-              return t.getBoundingClientRect().top - fonte.getBoundingClientRect().top + 4;
+              return t.getBoundingClientRect().top - fonte.getBoundingClientRect().top - 22;
             },
             ...(comEscala
               ? {
@@ -258,17 +264,22 @@ export function PalcoSobre() {
 
           tl.to(
             gsap.utils.toArray<HTMLElement>(".hero-solto", heroLayer),
-            { opacity: 0, y: 36, stagger: 0.03, ease: "power2.in", duration: 0.2 },
+            { autoAlpha: 0, y: 36, stagger: 0.03, ease: "power2.in", duration: 0.2 },
             0.15,
           );
 
-          if (nomeRef.current) {
+          if (nomeVooRef.current) {
             tl.to(
-              nomeRef.current,
-              { ...voo(nomeRef.current, ".alvo-logo", true), ease: "power2.inOut", duration: 0.55 },
+              nomeVooRef.current,
+              {
+                ...voo(nomeVooRef.current, ".alvo-logo", true),
+                transformOrigin: "0% 0%",
+                ease: "power2.inOut",
+                duration: 0.55,
+              },
               0.15,
             );
-            tl.to(nomeRef.current, { autoAlpha: 0, duration: 0.08, ease: "none" }, 0.66);
+            tl.to(nomeVooRef.current, { autoAlpha: 0, duration: 0.08, ease: "none" }, 0.66);
           }
 
           tl.to(fotoNitidaRef.current, { opacity: 0, ease: "power2.in", duration: 0.35 }, 0.18);
@@ -278,7 +289,7 @@ export function PalcoSobre() {
             { opacity: 0.9, ease: "sine.out", duration: 0.3 },
             0.2,
           );
-          tl.to(fotoRef.current, { x: -90, y: -40, ease: "power2.inOut", duration: 0.5 }, 0.2);
+          tl.to(fotoDriftRef.current, { x: -90, y: -40, ease: "power2.inOut", duration: 0.5 }, 0.2);
           tl.to(fotoPosRef.current, { autoAlpha: 0, ease: "power1.in", duration: 0.15 }, 0.62);
 
           // A sidebar BONITA se monta em cena, card a card.
@@ -307,7 +318,7 @@ export function PalcoSobre() {
                 y: () => {
                   const t = alvoDe(".alvo-stats");
                   if (!t) return 0;
-                  return t.getBoundingClientRect().top - el.getBoundingClientRect().top + 6;
+                  return t.getBoundingClientRect().top - el.getBoundingClientRect().top - 20;
                 },
                 scale: 0.82,
                 ease: "power3.out",
@@ -325,6 +336,14 @@ export function PalcoSobre() {
               0.55,
             );
             tl.to(ctaRef.current, { autoAlpha: 0, duration: 0.08, ease: "none" }, 0.9);
+          }
+
+          // A camada Sobre acorda pro palco dos capítulos (e o hero dorme):
+          // interação e seleção de texto passam pra quem está visível.
+          tl.set(sobreLayer, { pointerEvents: "auto" }, EXIT - 0.25);
+          tl.set(heroLayer, { pointerEvents: "none" }, EXIT - 0.25);
+          if (linhaSvgRef.current) {
+            tl.to(linhaSvgRef.current, { autoAlpha: 1, duration: 0.2 }, EXIT - 0.35);
           }
 
           // O "Sobre mim (&) minha jornada" já vem dando as caras.
@@ -365,6 +384,27 @@ export function PalcoSobre() {
             }
             tl.addLabel(`cap-${i}`, EXIT + i);
           });
+
+          // Âncora #historia: com o pin, o id aponta pro topo da página;
+          // intercepta e rola pro ponto da timeline onde o Sobre existe.
+          const st = tl.scrollTrigger;
+          const irPraHistoria = (e: Event) => {
+            e.preventDefault();
+            if (!st) return;
+            gsap.to(window, {
+              scrollTo: st.labelToScroll("cap-0"),
+              duration: 1,
+              ease: "power2.inOut",
+            });
+          };
+          const ancoras = Array.from(
+            document.querySelectorAll<HTMLAnchorElement>('a[href="#historia"]'),
+          );
+          ancoras.forEach((a) => a.addEventListener("click", irPraHistoria));
+
+          return () => {
+            ancoras.forEach((a) => a.removeEventListener("click", irPraHistoria));
+          };
         },
       );
 
@@ -379,11 +419,11 @@ export function PalcoSobre() {
       <div ref={heroLayerRef} className="relative w-full pb-16 pt-6 md:pt-10">
         <div className="relative mx-auto w-full max-w-[1500px] px-3 md:px-6">
           <div className="relative mx-auto w-full">
+            <div ref={nomeVooRef} style={{ transformOrigin: "0% 0%" }}>
             <svg
               ref={nomeRef}
               viewBox="0 0 1000 250"
               className="block h-auto w-full select-none"
-              style={{ transformBox: "fill-box", transformOrigin: "0% 0%" }}
               aria-hidden="true"
             >
               <defs>
@@ -429,6 +469,7 @@ export function PalcoSobre() {
                 {NOME}
               </text>
             </svg>
+            </div>
 
             {/* Foto cravada no vão B|R (externa posiciona, interna anima). */}
             <div
@@ -436,6 +477,7 @@ export function PalcoSobre() {
               className="pointer-events-none absolute z-10 aspect-[1122/1402]"
               style={{ width: "clamp(240px, 44%, 660px)", top: "-62%", left: "49%", transform: "translateX(-47.7%)" }}
             >
+              <div ref={fotoDriftRef} className="absolute inset-0">
               <div ref={fotoRef} className="absolute inset-0">
                 <div ref={fotoNitidaRef} className="absolute inset-0">
                   <Image
@@ -458,6 +500,7 @@ export function PalcoSobre() {
                   />
                 </div>
               </div>
+              </div>
             </div>
 
             <h1 className="sr-only">
@@ -466,11 +509,15 @@ export function PalcoSobre() {
             <p className="sr-only">{stats.map((s) => `${s.valor} ${s.rotulo}`).join(". ")}.</p>
 
             <div className="pointer-events-none absolute inset-0 z-20 hidden md:block" aria-hidden>
-              <div className="absolute left-[3%] top-[62%]" data-depth="1.4" data-fly="stat-0">
-                <StatCard valor={stats[0].valor} rotulo={stats[0].rotulo} />
+              <div className="absolute left-[3%] top-[62%]" data-fly="stat-0">
+                <div data-depth="1.4">
+                  <StatCard valor={stats[0].valor} rotulo={stats[0].rotulo} />
+                </div>
               </div>
-              <div className="absolute right-[3%] top-[8%]" data-depth="0.8" data-fly="stat-1">
-                <StatCard valor={stats[1].valor} rotulo={stats[1].rotulo} />
+              <div className="absolute right-[3%] top-[8%]" data-fly="stat-1">
+                <div data-depth="0.8">
+                  <StatCard valor={stats[1].valor} rotulo={stats[1].rotulo} />
+                </div>
               </div>
             </div>
           </div>
@@ -558,7 +605,7 @@ export function PalcoSobre() {
 
         <div className="mx-auto grid min-h-screen w-full max-w-[1500px] items-center gap-10 px-6 py-20 min-[900px]:h-full min-[900px]:grid-cols-[300px_1fr] min-[900px]:px-10 min-[900px]:py-0">
           {/* A sidebar REAL: se monta em cena e nunca mais se move. */}
-          <div ref={sidebarRef} className="pointer-events-auto hidden min-[900px]:block">
+          <div ref={sidebarRef} className="hidden min-[900px]:block">
             <SidebarSobre />
           </div>
 
@@ -580,6 +627,7 @@ export function PalcoSobre() {
             </div>
 
             <svg
+              ref={linhaSvgRef}
               aria-hidden
               viewBox="0 0 100 100"
               preserveAspectRatio="none"
@@ -606,7 +654,7 @@ export function PalcoSobre() {
             </svg>
 
             {/* Fallback sem pin: cards empilhados. */}
-            <ol className="relative z-10 flex w-full max-w-xl flex-col gap-6 min-[900px]:block min-[900px]:h-[34rem]">
+            <ol ref={olRef} className="relative z-10 flex w-full max-w-xl flex-col gap-6">
               {historia.map((cap, i) => (
                 <li
                   key={cap.marcador}

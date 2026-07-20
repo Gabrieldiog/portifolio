@@ -3,10 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { contato } from "@/lib/dados";
 
-// A sidebar do "Sobre mim" — usada DUAS vezes: o clone que se monta em cena
-// durante o voo do hero (fantasma decorativo) e a real da seção Historia.
-// As classes .alvo-* são os pontos de pouso do voo.
-export function SidebarSobre({ fantasma = false }: { fantasma?: boolean }) {
+// A sidebar do "Sobre mim": se monta em cena durante o voo do hero e fica
+// pro resto da jornada. As classes .alvo-* são os pontos de pouso do voo.
+export function SidebarSobre() {
   const logoRef = useRef<HTMLSpanElement>(null);
 
   // O logo acompanha o morph GABRIEL/DIOGO do hero.
@@ -22,8 +21,7 @@ export function SidebarSobre({ fantasma = false }: { fantasma?: boolean }) {
   return (
     <aside
       className="flex flex-col gap-3"
-      aria-hidden={fantasma || undefined}
-      aria-label={fantasma ? undefined : "Resumo e navegação"}
+      aria-label="Resumo e navegação"
     >
       <div className="sobre-card rounded-2xl border border-border bg-surface p-5">
         <span
@@ -53,12 +51,11 @@ export function SidebarSobre({ fantasma = false }: { fantasma?: boolean }) {
         </div>
       </div>
 
-      <nav className="sobre-card rounded-2xl border border-border bg-surface p-3" aria-label={fantasma ? undefined : "Seções"}>
+      <nav className="sobre-card rounded-2xl border border-border bg-surface p-3" aria-label="Seções">
         <ul className="flex flex-col gap-1">
           <li>
             <a
               href="#topo"
-              tabIndex={fantasma ? -1 : undefined}
               className="block rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-2 hover:text-text"
             >
               Home
@@ -72,7 +69,6 @@ export function SidebarSobre({ fantasma = false }: { fantasma?: boolean }) {
           <li>
             <a
               href="#projetos"
-              tabIndex={fantasma ? -1 : undefined}
               className="alvo-menu-projetos block rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-2 hover:text-text"
             >
               Projetos
@@ -81,7 +77,6 @@ export function SidebarSobre({ fantasma = false }: { fantasma?: boolean }) {
           <li>
             <a
               href="#trajetoria"
-              tabIndex={fantasma ? -1 : undefined}
               className="alvo-menu-trajetoria block rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-2 hover:text-text"
             >
               Trajetória
@@ -91,12 +86,11 @@ export function SidebarSobre({ fantasma = false }: { fantasma?: boolean }) {
       </nav>
 
       <div className="sobre-card">
-        <BotaoEmail fantasma={fantasma} />
+        <BotaoEmail />
       </div>
 
       <a
         href="#contato"
-        tabIndex={fantasma ? -1 : undefined}
         className="sobre-card alvo-cta rounded-2xl bg-accent px-5 py-3.5 text-center font-medium text-bg transition-colors hover:bg-accent-hi"
       >
         Falar comigo
@@ -106,13 +100,12 @@ export function SidebarSobre({ fantasma = false }: { fantasma?: boolean }) {
 }
 
 // E-mail com copiar, no formato pill da sidebar.
-function BotaoEmail({ fantasma }: { fantasma?: boolean }) {
+function BotaoEmail() {
   const [copiado, setCopiado] = useState(false);
 
   return (
     <button
       type="button"
-      tabIndex={fantasma ? -1 : undefined}
       onClick={async () => {
         try {
           await navigator.clipboard.writeText(contato.email);
@@ -123,12 +116,16 @@ function BotaoEmail({ fantasma }: { fantasma?: boolean }) {
         }
       }}
       className="group flex w-full items-center justify-between gap-2 rounded-2xl border border-border bg-surface px-4 py-3 text-left transition-colors hover:border-accent/50"
-      aria-label={fantasma ? undefined : `Copiar e-mail ${contato.email}`}
+      aria-label={`Copiar e-mail ${contato.email}`}
     >
       <span className="truncate font-mono text-xs text-muted group-hover:text-text">
         {contato.email}
       </span>
-      <span className="shrink-0 font-mono text-[0.6rem] uppercase tracking-[0.12em] text-accent">
+      <span
+        role="status"
+        aria-live="polite"
+        className="shrink-0 font-mono text-[0.6rem] uppercase tracking-[0.12em] text-accent"
+      >
         {copiado ? "copiado ✓" : "copiar"}
       </span>
     </button>

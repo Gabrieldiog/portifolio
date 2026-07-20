@@ -21,7 +21,11 @@ export function CopiarEmail() {
       className="group inline-flex items-center gap-3 font-mono text-lg text-text transition-colors hover:text-accent md:text-xl"
     >
       <span>{contato.email}</span>
-      <span className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-faint group-hover:text-accent">
+      <span
+        role="status"
+        aria-live="polite"
+        className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-faint group-hover:text-accent"
+      >
         {copiado ? "copiado ✓" : "copiar"}
       </span>
     </button>

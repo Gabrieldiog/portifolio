@@ -36,7 +36,7 @@ export function Projetos() {
 
           // No modo pinado o scroll é vertical: trava o scroll nativo do trilho
           // e move o track por transform.
-          gsap.set(wrap, { overflowX: "hidden" });
+          gsap.set(wrap, { overflowX: "clip" }); // clip: sem scroll de foco somando com o transform
           const distancia = () => track.scrollWidth - wrap.clientWidth;
 
           gsap.to(track, {
@@ -98,13 +98,15 @@ export function Projetos() {
 
 function CardProjeto({ projeto, indice }: { projeto: Projeto; indice: number }) {
   return (
-    <a
-      href={projeto.link}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={`Abrir ${projeto.nome} no ar`}
-      className="group relative block aspect-[3/4] w-[min(78vw,440px)] shrink-0 snap-start overflow-hidden rounded-3xl border border-border bg-surface"
-    >
+    <div className="group relative aspect-[3/4] w-[min(78vw,440px)] shrink-0 snap-start overflow-hidden rounded-3xl border border-border bg-surface">
+      {/* O card inteiro leva pro site (link esticado). */}
+      <a
+        href={projeto.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Abrir ${projeto.nome} no ar`}
+        className="absolute inset-0 z-10 rounded-3xl"
+      />
       <Image
         src={projeto.imagem}
         alt={`Tela do ${projeto.nome}`}
@@ -147,6 +149,17 @@ function CardProjeto({ projeto, indice }: { projeto: Projeto; indice: number }) 
           ↗
         </span>
       </div>
-    </a>
+
+      {projeto.repo && (
+        <a
+          href={projeto.repo}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute left-5 top-[4.6rem] z-20 rounded-full border border-white/20 bg-black/40 px-3 py-1 font-mono text-[0.62rem] uppercase tracking-[0.12em] text-text backdrop-blur-sm transition-colors hover:border-accent hover:text-accent"
+        >
+          Código ↗
+        </a>
+      )}
+    </div>
   );
 }

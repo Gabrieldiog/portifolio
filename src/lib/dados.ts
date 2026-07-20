@@ -65,73 +65,6 @@ export const historia: Capitulo[] = [
   },
 ];
 
-// ── Sistemas do trabalho (a prova em números) ───────────────────────────────
-export type Sistema = {
-  id: string;
-  nome: string;
-  tagline: string;
-  descricao: string;
-  metricaValor: number;
-  metricaSufixo: string;
-  metricaRotulo: string;
-  papel: string;
-  stack: string[];
-  link?: string;
-};
-
-export const sistemas: Sistema[] = [
-  {
-    id: "gpol",
-    nome: "GPol",
-    tagline: "Inteligência política em tempo real",
-    descricao:
-      "O mapa eleitoral inteiro numa tela: os 5.570 municípios, voto geolocalizado por local de votação, dados do TSE e do Censo e escuta social com IA. Cuidei do back-end, da integração dos dados e da gestão de usuários.",
-    metricaValor: 40,
-    metricaSufixo: "",
-    metricaRotulo: "pessoas usando em produção, em 2 estados (GO e CE)",
-    papel: "Back-end · integração de dados · gestão de usuários",
-    stack: ["Node.js", "TypeScript", "Python", "SQL"],
-    link: "https://sergio.seg.br/gpol-/",
-  },
-  {
-    id: "assego",
-    nome: "Gestão ASSEGO",
-    tagline: "Um sistema no lugar de um legado inteiro",
-    descricao:
-      "A associação rodava num sistema antigo. Participei da criação e evolução do substituto de ponta a ponta: 14+ módulos entre financeiro, jurídico e comercial, incluindo a configuração dos servidores.",
-    metricaValor: 55,
-    metricaSufixo: "",
-    metricaRotulo: "usuários ativos, 30+ todo dia, em 14+ módulos",
-    papel: "Full stack · infraestrutura",
-    stack: ["PHP", "Node.js", "TypeScript", "SQL"],
-  },
-  {
-    id: "totem",
-    nome: "Totem IHGG",
-    tagline: "Um acervo histórico numa tela de toque, em Brasília",
-    descricao:
-      "O Instituto Histórico e Geográfico de Goiás queria abrir seu acervo de jornais ao público. Arquitetei e construí o totem touchscreen, da modelagem do banco à interface, exposto em Brasília.",
-    metricaValor: 200,
-    metricaSufixo: "+",
-    metricaRotulo: "visitantes consultando o acervo em Brasília",
-    papel: "Arquiteto e desenvolvedor",
-    stack: ["TypeScript", "Node.js", "MySQL"],
-  },
-  {
-    id: "conteudoclub",
-    nome: "Calculadora Conteúdo Club",
-    tagline: "Preço justo pra quem vive de conteúdo",
-    descricao:
-      "No Conteúdo Club, construí a calculadora digital que ajuda criadores a precificar e planejar serviços, participando de perto das decisões técnicas e de produto.",
-    metricaValor: 100,
-    metricaSufixo: "+",
-    metricaRotulo: "criadores de conteúdo usando na precificação",
-    papel: "Full stack · produto",
-    stack: ["Vue.js", "Node.js", "SQL"],
-    link: "https://calculadoradocreator.com",
-  },
-];
-
 // ── Projetos no ar (com link e print real) ──────────────────────────────────
 export type Projeto = {
   id: string;
@@ -247,7 +180,7 @@ export const trajetoria: Trabalho[] = [
       "Mais de 10 outros sistemas e APIs internas pra operação do dia a dia",
       "Apoio à configuração dos servidores de tudo isso",
     ],
-    nota: "Sistemas internos: rodam na rede da associação, sem landing page pra visitar. A prova são os 105+ usuários todo dia.",
+    nota: "Sistemas internos: rodam na rede da associação, sem landing page pra visitar. A prova: 105+ pessoas usando, 30+ delas todo dia.",
     metrica: { valor: 15, sufixo: "+", rotulo: "sistemas e APIs construídos" },
   },
   {

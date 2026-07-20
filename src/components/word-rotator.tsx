@@ -5,9 +5,9 @@ import { gsap, useGSAP } from "@/lib/gsap";
 
 type WordRotatorProps = { words: string[]; interval?: number; className?: string };
 
-// Palavras trocando. A parte animada é aria-hidden; o leitor de tela ouve a
-// lista completa uma vez (sem spam de aria-live). O loop é finito (3 voltas,
-// termina na primeira palavra) e pausa com o cursor em cima.
+// Palavras trocando em loop contínuo. A parte animada é aria-hidden; o
+// leitor de tela ouve a lista completa uma vez (sem spam de aria-live).
+// O cursor em cima pausa (esperando a troca em curso terminar).
 export function WordRotator({ words, interval = 2.2, className }: WordRotatorProps) {
   const root = useRef<HTMLSpanElement>(null);
 
