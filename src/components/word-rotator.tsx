@@ -45,10 +45,20 @@ export function WordRotator({ words, interval = 2.2, className }: WordRotatorPro
               );
           });
 
-          // Pausa sob o cursor (conteúdo em movimento precisa de freio).
+          // Pausa sob o cursor (conteúdo em movimento precisa de freio) —
+          // mas nunca no MEIO de uma troca: termina a transição e aí para.
           const el = root.current;
-          const pausar = () => tl.pause();
-          const retomar = () => tl.resume();
+          let pausado = false;
+          const pausar = () => {
+            pausado = true;
+            gsap.delayedCall(0.65, () => {
+              if (pausado) tl.pause();
+            });
+          };
+          const retomar = () => {
+            pausado = false;
+            tl.resume();
+          };
           el?.addEventListener("pointerenter", pausar);
           el?.addEventListener("pointerleave", retomar);
 
@@ -65,16 +75,22 @@ export function WordRotator({ words, interval = 2.2, className }: WordRotatorPro
     { scope: root, dependencies: [words, interval] },
   );
 
-  // A palavra mais longa dá a largura do container (os itens são absolutos).
-  const maisLonga = words.reduce((a, b) => (b.length > a.length ? b : a), "");
-
   return (
     <span
       ref={root}
-      className={`relative inline-block h-[1.15em] overflow-hidden align-bottom ${className ?? ""}`}
+      className={`relative inline-block h-[1.15em] overflow-hidden pr-[0.05em] align-bottom ${className ?? ""}`}
     >
       <span aria-hidden="true" className="relative block h-full">
-        <span className="invisible whitespace-nowrap">{maisLonga}</span>
+        {/* TODAS as palavras como fantasmas: a caixa fica com a largura da
+            mais LARGA em pixels (contar letras mentia: "automatizar" é mais
+            gorda que "simplificar" com o mesmo tanto de letras). */}
+        <span className="invisible block h-0 overflow-hidden">
+          {words.map((word) => (
+            <span key={word} className="block whitespace-nowrap">
+              {word}
+            </span>
+          ))}
+        </span>
         {words.map((word) => (
           <span key={word} className="word-rotator-item absolute inset-0 whitespace-nowrap">
             {word}
