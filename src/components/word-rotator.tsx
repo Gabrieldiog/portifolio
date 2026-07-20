@@ -78,7 +78,7 @@ export function WordRotator({ words, interval = 2.2, className }: WordRotatorPro
   return (
     <span
       ref={root}
-      className={`relative inline-block h-[1.15em] overflow-hidden pr-[0.05em] align-bottom ${className ?? ""}`}
+      className={`relative inline-block h-[1.15em] overflow-hidden pr-[0.05em] text-left align-bottom ${className ?? ""}`}
     >
       <span aria-hidden="true" className="relative block h-full">
         {/* TODAS as palavras como fantasmas: a caixa fica com a largura da

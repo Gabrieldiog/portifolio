@@ -12,6 +12,8 @@ export const contato = {
   email: "diogo.software1@gmail.com",
   github: "https://github.com/Gabrieldiog",
   linkedin: "https://linkedin.com/in/gabrieldiogovsilva",
+  whatsapp: "https://wa.me/5562984931303",
+  whatsappLabel: "(62) 98493-1303",
 };
 
 // Palavras que trocam no título do hero.

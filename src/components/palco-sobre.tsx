@@ -373,8 +373,10 @@ export function PalcoSobre() {
             );
           }
 
+          // O "Sobre mim (&) minha jornada" fica FIXO durante toda a seção
+          // (só some no finalzinho, quando o último capítulo vai embora).
           if (header) {
-            tl.to(header, { autoAlpha: 0, y: -36, duration: 0.45 }, EXIT + 0.1);
+            tl.to(header, { autoAlpha: 0, y: -36, duration: 0.4 }, TOTAL - 0.3);
           }
 
           cards.forEach((el, i) => {
