@@ -21,7 +21,9 @@ export function Hero() {
   const nomeRef = useRef<SVGSVGElement>(null);
   const textoBaseRef = useRef<SVGTextElement>(null);
   const textoAcesoRef = useRef<SVGTextElement>(null);
+  const fotoPosRef = useRef<HTMLDivElement>(null);
   const fotoRef = useRef<HTMLDivElement>(null);
+  const medidaRef = useRef<SVGTextElement>(null);
   const spotRef = useRef<SVGCircleElement>(null);
   const ctaRef = useMagnetic<HTMLAnchorElement>();
   const cta2Ref = useMagnetic<HTMLAnchorElement>();
@@ -31,13 +33,14 @@ export function Hero() {
   // centro da CABEÇA (47,7% do PNG, medido no alfa) nesse vão.
   useEffect(() => {
     const posicionar = () => {
-      const texto = textoBaseRef.current;
-      const foto = fotoRef.current;
+      const texto = medidaRef.current; // texto estático: o morph não interfere
+      const foto = fotoPosRef.current;
       if (!texto || !foto) return;
       try {
         const total = texto.getSubStringLength(0, NOME.length);
         const ateB = texto.getSubStringLength(0, 3); // G, A, B
-        foto.style.left = `${(ateB / total) * 100}%`;
+        const frac = ateB / total;
+        if (frac > 0.3 && frac < 0.65) foto.style.left = `${frac * 100}%`;
       } catch {
         /* fonte ainda não pronta; o resize/fonts.ready tenta de novo */
       }
@@ -262,6 +265,17 @@ export function Hero() {
               </mask>
             </defs>
             <text
+              ref={medidaRef}
+              x="0"
+              y="205"
+              textLength="1000"
+              lengthAdjust="spacingAndGlyphs"
+              opacity="0"
+              style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 245 }}
+            >
+              {NOME}
+            </text>
+            <text
               ref={textoBaseRef}
               x="0"
               y="205"
@@ -284,21 +298,24 @@ export function Hero() {
             </text>
           </svg>
 
-          {/* Foto no CENTRO, na frente do nome, cruzando a nav. */}
+          {/* Foto cravada no vão B|R: a div EXTERNA só posiciona (o JS mede o
+              vão); a INTERNA recebe parallax e blur sem nunca tocar na posição. */}
           <div
-            ref={fotoRef}
+            ref={fotoPosRef}
             className="pointer-events-none absolute z-10 aspect-[1122/1402]"
             style={{ width: "clamp(240px, 44%, 660px)", top: "-62%", left: "49%", transform: "translateX(-47.7%)" }}
           >
-            <Image
-              src="/fotominha.png"
-              alt=""
-              fill
-              priority
-              sizes="(max-width: 768px) 60vw, 44vw"
-              className="object-contain"
-              onLoad={() => ScrollTrigger.refresh()}
-            />
+            <div ref={fotoRef} className="absolute inset-0">
+              <Image
+                src="/fotominha.png"
+                alt=""
+                fill
+                priority
+                sizes="(max-width: 768px) 60vw, 44vw"
+                className="object-contain"
+                onLoad={() => ScrollTrigger.refresh()}
+              />
+            </div>
           </div>
 
           <h1 className="sr-only">
