@@ -44,21 +44,6 @@ export function Historia() {
           };
           if (!isDesktop || reduceMotion) return;
 
-          // A sidebar chega junto com o que desceu do hero.
-          gsap.from(".hist-sidebar > *", {
-            opacity: 0,
-            y: -46,
-            x: -30,
-            duration: 0.6,
-            ease: "power3.out",
-            stagger: 0.08,
-            scrollTrigger: {
-              trigger: containerRef.current,
-              start: "top 55%",
-              once: true,
-            },
-          });
-
           const cards = cardRefs.current.filter((el): el is HTMLLIElement => el !== null);
           if (cards.length < 2) return;
 
@@ -73,6 +58,7 @@ export function Historia() {
 
           const tl = gsap.timeline({
             scrollTrigger: {
+              id: "historia-pin",
               trigger: containerRef.current,
               start: "top top",
               end: () => `+=${total * window.innerHeight}`,
@@ -138,8 +124,9 @@ export function Historia() {
       <div className="mx-auto grid min-h-screen w-full max-w-[1500px] items-center gap-10 px-6 py-20 min-[900px]:grid-cols-[300px_1fr] min-[900px]:px-10 min-[900px]:py-0">
         {/* Sidebar: quem está contando a história. */}
         <aside className="hist-sidebar hidden flex-col gap-3 min-[900px]:flex" aria-label="Resumo e navegação">
-          <div className="rounded-2xl border border-border bg-surface p-5">
+          <div data-fly-target className="rounded-2xl border border-border bg-surface p-5">
             <span
+              id="alvo-logo"
               ref={logoRef}
               className="inline-block rounded-lg bg-accent px-3 py-1 font-display text-sm font-bold text-bg"
             >
@@ -150,7 +137,7 @@ export function Historia() {
             </p>
           </div>
 
-          <div className="flex items-center gap-4 rounded-2xl border border-border bg-surface p-5">
+          <div id="alvo-stats" data-fly-target className="flex items-center gap-4 rounded-2xl border border-border bg-surface p-5">
             <div>
               <p className="font-display text-2xl font-semibold text-accent tnum">3+</p>
               <p className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-muted">anos de código</p>
@@ -162,7 +149,7 @@ export function Historia() {
             </div>
           </div>
 
-          <nav className="rounded-2xl border border-border bg-surface p-3" aria-label="Seções">
+          <nav data-fly-target className="rounded-2xl border border-border bg-surface p-3" aria-label="Seções">
             <ul className="flex flex-col gap-1">
               <li>
                 <a href="#topo" className="block rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-2 hover:text-text">
@@ -170,26 +157,30 @@ export function Historia() {
                 </a>
               </li>
               <li>
-                <span ref={menuAtivoRef} className="block rounded-lg bg-accent px-3 py-2 text-sm font-medium text-bg">
+                <span id="alvo-menu-sobre" ref={menuAtivoRef} className="block rounded-lg bg-accent px-3 py-2 text-sm font-medium text-bg">
                   Sobre mim
                 </span>
               </li>
               <li>
-                <a href="#projetos" className="block rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-2 hover:text-text">
+                <a id="alvo-menu-projetos" href="#projetos" className="block rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-2 hover:text-text">
                   Projetos
                 </a>
               </li>
               <li>
-                <a href="#trajetoria" className="block rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-2 hover:text-text">
+                <a id="alvo-menu-trajetoria" href="#trajetoria" className="block rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-2 hover:text-text">
                   Trajetória
                 </a>
               </li>
             </ul>
           </nav>
 
-          <BotaoEmail />
+          <div data-fly-target>
+            <BotaoEmail />
+          </div>
 
           <a
+            id="alvo-cta"
+            data-fly-target
             href="#contato"
             className="rounded-2xl bg-accent px-5 py-3.5 text-center font-medium text-bg transition-colors hover:bg-accent-hi"
           >

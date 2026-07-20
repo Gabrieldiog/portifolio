@@ -10,30 +10,35 @@ import { useMagnetic } from "@/hooks/use-magnetic";
 const NOME = perfil.nomeGigante; // GABRIEL
 const APELIDO = "DIOGO";
 
-// Dourado de verdade no nome: base apagada + camada acesa pelo holofote.
+// Dourado iluminado: base + camada acesa pelo holofote.
 const OURO_BASE = "#c99a12";
 const OURO_ACESO = "#ffdd66";
 
-const stats = [{ valor: "3+", rotulo: "anos de experiência" }, { valor: "15+", rotulo: "sistemas construídos" }];
+const stats = [
+  { valor: "3+", rotulo: "anos de experiência" },
+  { valor: "15+", rotulo: "sistemas construídos" },
+];
 
 export function Hero() {
   const root = useRef<HTMLElement>(null);
   const nomeRef = useRef<SVGSVGElement>(null);
+  const medidaRef = useRef<SVGTextElement>(null);
   const textoBaseRef = useRef<SVGTextElement>(null);
   const textoAcesoRef = useRef<SVGTextElement>(null);
   const fotoPosRef = useRef<HTMLDivElement>(null);
   const fotoRef = useRef<HTMLDivElement>(null);
-  const medidaRef = useRef<SVGTextElement>(null);
+  const fotoNitidaRef = useRef<HTMLDivElement>(null);
+  const fotoBorradaRef = useRef<HTMLDivElement>(null);
   const spotRef = useRef<SVGCircleElement>(null);
   const ctaRef = useMagnetic<HTMLAnchorElement>();
   const cta2Ref = useMagnetic<HTMLAnchorElement>();
 
   // A foto fica cravada no vão entre o B e o R: mede a largura real dos
-  // glifos (a proporção sobrevive ao esticamento do textLength) e alinha o
+  // glifos num texto ESTÁTICO invisível (o morph não contamina) e alinha o
   // centro da CABEÇA (47,7% do PNG, medido no alfa) nesse vão.
   useEffect(() => {
     const posicionar = () => {
-      const texto = medidaRef.current; // texto estático: o morph não interfere
+      const texto = medidaRef.current;
       const foto = fotoPosRef.current;
       if (!texto || !foto) return;
       try {
@@ -42,7 +47,7 @@ export function Hero() {
         const frac = ateB / total;
         if (frac > 0.3 && frac < 0.65) foto.style.left = `${frac * 100}%`;
       } catch {
-        /* fonte ainda não pronta; o resize/fonts.ready tenta de novo */
+        /* fonte ainda não pronta; fonts.ready/resize tentam de novo */
       }
     };
     document.fonts.ready.then(posicionar);
@@ -76,10 +81,7 @@ export function Hero() {
             depth: Number(el.dataset.depth ?? "1"),
           }));
 
-          const nome = nomeRef.current;
-          const foto = fotoRef.current;
-          const nomeX = nome && gsap.quickTo(nome, "x", { duration: 0.8, ease: "power3.out" });
-          const nomeY = nome && gsap.quickTo(nome, "y", { duration: 0.8, ease: "power3.out" });
+          const foto = fotoRef.current; // camada interna: nunca a posição
           const fotoX = foto && gsap.quickTo(foto, "x", { duration: 0.6, ease: "power3.out" });
           const fotoY = foto && gsap.quickTo(foto, "y", { duration: 0.6, ease: "power3.out" });
           const spotX = spot && gsap.quickTo(spot, "x", { duration: 0.35, ease: "power2.out" });
@@ -90,14 +92,13 @@ export function Hero() {
             const relY = e.clientY / window.innerHeight - 0.5;
 
             movers.forEach((m) => {
-              m.x(relX * 26 * m.depth);
-              m.y(relY * 26 * m.depth);
+              m.x(relX * 24 * m.depth);
+              m.y(relY * 24 * m.depth);
             });
-            fotoX?.(relX * 16);
-            fotoY?.(relY * 10);
-            nomeX?.(relX * -10);
-            nomeY?.(relY * -6);
+            fotoX?.(relX * 14);
+            fotoY?.(relY * 9);
 
+            const nome = nomeRef.current;
             if (nome && spotX && spotY) {
               const r = nome.getBoundingClientRect();
               spotX(((e.clientX - r.left) / r.width) * 1000);
@@ -119,7 +120,6 @@ export function Hero() {
           alvos.forEach((t) => {
             if (t) t.textContent = driver.textContent;
           });
-          // O card da sidebar (e quem mais quiser) acompanha o morph.
           window.dispatchEvent(
             new CustomEvent("nome-morph", { detail: driver.textContent ?? "" }),
           );
@@ -147,96 +147,171 @@ export function Hero() {
         };
       });
 
-      // ── Saída pinada: o hero PRENDE e cada coisa VOA pra lateral ───────
-      // (como a referência: nome encolhe virando o logo, links empilham à
-      // esquerda em cascata, stats descem pra coluna, CTA vai pro canto,
-      // a foto desfoca até sumir; só então a próxima seção chega.)
-      mm.add(
-        "(min-width: 900px) and (prefers-reduced-motion: no-preference)",
-        () => {
-          const links = gsap.utils.toArray<HTMLElement>(".hero-nav a", root.current);
-          const cardsFlutuantes = gsap.utils.toArray<HTMLElement>("[data-depth]", root.current);
+      // ── O VOO: hero preso, cada peça voa pro lugar EXATO da sidebar ────
+      // Os alvos são os elementos reais da sidebar da seção seguinte
+      // ([data-fly-target]); origem e alvo medidos no MESMO tick (o scroll
+      // se cancela) e o -historiaStart projeta o alvo pra onde ele estará
+      // quando a Historia pinar. No fim do pin, troca por visibilidade:
+      // fantasmas somem, sidebar real assume no mesmo pixel.
+      mm.add("(min-width: 900px) and (prefers-reduced-motion: no-preference)", () => {
+        const historiaStart = () => ScrollTrigger.getById("historia-pin")?.start ?? 0;
 
-          const tl = gsap.timeline({
-            scrollTrigger: {
-              trigger: root.current,
-              start: "top top",
-              end: "+=130%",
-              scrub: 1,
-              pin: true,
-              anticipatePin: 1,
-              invalidateOnRefresh: true,
+        const alvoDe = (sel: string) => document.querySelector<HTMLElement>(sel);
+        const voo = (fonte: Element | null, sel: string, comEscala = false) => ({
+          x: () => {
+            const t = alvoDe(sel);
+            if (!fonte || !t) return 0;
+            return t.getBoundingClientRect().left - fonte.getBoundingClientRect().left + 14;
+          },
+          y: () => {
+            const t = alvoDe(sel);
+            if (!fonte || !t) return 0;
+            return (
+              t.getBoundingClientRect().top -
+              fonte.getBoundingClientRect().top -
+              historiaStart() +
+              6
+            );
+          },
+          ...(comEscala
+            ? {
+                scale: () => {
+                  const t = alvoDe(sel);
+                  const h = fonte?.getBoundingClientRect().height;
+                  if (!t || !h) return 1;
+                  return t.getBoundingClientRect().height / h;
+                },
+              }
+            : {}),
+        });
+
+        const q = gsap.utils.selector(root);
+        const linksVoo: [string, string][] = [
+          ['a[href="#historia"]', "#alvo-menu-sobre"],
+          ['a[href="#projetos"]', "#alvo-menu-projetos"],
+          ['a[href="#trajetoria"]', "#alvo-menu-trajetoria"],
+        ];
+        const voadores = () =>
+          [
+            nomeRef.current,
+            ctaRef.current,
+            ...linksVoo.map(([sel]) => q(sel)[0]),
+            ...q("[data-fly]"),
+          ].filter(Boolean) as HTMLElement[];
+        const alvosReais = () => gsap.utils.toArray<HTMLElement>("[data-fly-target]");
+
+        // Fantasmas ↔ sidebar real: troca instantânea no handoff.
+        const troca = (entregue: boolean) => {
+          gsap.set(voadores(), { autoAlpha: entregue ? 0 : 1 });
+          gsap.set(alvosReais(), { autoAlpha: entregue ? 1 : 0 });
+        };
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            id: "hero-flight",
+            trigger: root.current,
+            start: "top top",
+            end: () => `+=${window.innerHeight * 1.4}`,
+            scrub: 0.8,
+            pin: true,
+            anticipatePin: 1,
+            fastScrollEnd: true,
+            invalidateOnRefresh: true,
+            refreshPriority: 1,
+            onEnter: () => gsap.set(voadores(), { willChange: "transform, opacity" }),
+            onLeaveBack: () => gsap.set(voadores(), { willChange: "auto" }),
+            onLeave: () => {
+              gsap.set(voadores(), { willChange: "auto" });
+              troca(true);
             },
-          });
+            onEnterBack: () => troca(false),
+          },
+        });
 
-          // Nome encolhe pro canto superior esquerdo (vira o "logo").
+        // Estado inicial da troca depende de onde a página carregou.
+        requestAnimationFrame(() => {
+          troca((tl.scrollTrigger?.progress ?? 0) >= 1);
+        });
+
+        // 0→0.15: respiro (nada se move).
+        tl.to({}, { duration: 0.15 }, 0);
+
+        // Dispersão de quem não tem pouso na sidebar.
+        tl.to(
+          gsap.utils.toArray<HTMLElement>(".hero-solto", root.current),
+          { opacity: 0, y: 36, stagger: 0.03, ease: "power2.in", duration: 0.2 },
+          0.15,
+        );
+
+        // O nome gigante voa virando o logo da sidebar.
+        if (nomeRef.current) {
           tl.to(
             nomeRef.current,
-            { scale: 0.17, x: 28, y: 16, transformOrigin: "left top", ease: "none" },
-            0,
+            { ...voo(nomeRef.current, "#alvo-logo", true), ease: "power2.inOut", duration: 0.6 },
+            0.15,
           );
+        }
 
-          // A foto desfoca e some (borrão como a referência).
+        // A foto: crossfade pra camada borrada (blur FIXO, nunca animado) e some.
+        tl.to(fotoNitidaRef.current, { opacity: 0, ease: "power2.in", duration: 0.35 }, 0.18);
+        tl.fromTo(
+          fotoBorradaRef.current,
+          { opacity: 0 },
+          { opacity: 0.9, ease: "sine.out", duration: 0.3 },
+          0.2,
+        );
+        tl.to(fotoRef.current, { x: -90, y: -40, ease: "power2.inOut", duration: 0.5 }, 0.2);
+        tl.to(fotoPosRef.current, { autoAlpha: 0, ease: "power1.in", duration: 0.15 }, 0.7);
+
+        // Links da nav em cascata diagonal pros itens do menu real.
+        linksVoo.forEach(([sel, alvo], i) => {
+          const el = q(sel)[0];
+          if (!el) return;
+          tl.to(el, { ...voo(el, alvo), ease: "power3.out", duration: 0.32 }, 0.28 + i * 0.06);
+        });
+
+        // Stat-cards pousam nas metades do card de stats da sidebar.
+        const statEls = q("[data-fly]");
+        statEls.forEach((el, i) => {
           tl.to(
-            fotoRef.current,
-            { filter: "blur(18px)", opacity: 0, scale: 1.06, ease: "none" },
-            0.08,
+            el,
+            {
+              x: () => {
+                const t = alvoDe("#alvo-stats");
+                if (!t) return 0;
+                const r = t.getBoundingClientRect();
+                return r.left + (i === 0 ? 10 : r.width / 2) - el.getBoundingClientRect().left;
+              },
+              y: () => {
+                const t = alvoDe("#alvo-stats");
+                if (!t) return 0;
+                return (
+                  t.getBoundingClientRect().top -
+                  el.getBoundingClientRect().top -
+                  historiaStart() +
+                  8
+                );
+              },
+              scale: 0.82,
+              ease: "power3.out",
+              duration: 0.34,
+            },
+            0.3 + i * 0.06,
           );
+        });
 
-          // Headline, tagline e chips sobem e saem cedo.
+        // O CTA pousa por último, com respiro.
+        if (ctaRef.current) {
           tl.to(
-            gsap.utils.toArray<HTMLElement>(".hero-solto", root.current),
-            { y: -70, opacity: 0, stagger: 0.04, ease: "none" },
-            0,
+            ctaRef.current,
+            { ...voo(ctaRef.current, "#alvo-cta"), ease: "back.out(1.5)", duration: 0.25 },
+            0.6,
           );
+        }
 
-          // Links da nav voam um a um pra pilha vertical à esquerda (cascata).
-          links.forEach((el, i) => {
-            tl.to(
-              el,
-              {
-                x: () => 48 - el.getBoundingClientRect().left,
-                y: () => window.innerHeight * 0.4 + i * 54 - el.getBoundingClientRect().top,
-                ease: "none",
-              },
-              0.12 + i * 0.07,
-            );
-          });
-          tl.to(links, { opacity: 0, duration: 0.12, ease: "none" }, 0.86);
-
-          // Stat-cards descem pra coluna esquerda.
-          cardsFlutuantes.forEach((el, i) => {
-            tl.to(
-              el,
-              {
-                x: () => 48 - el.getBoundingClientRect().left,
-                y: () => window.innerHeight * 0.16 + i * 104 - el.getBoundingClientRect().top,
-                ease: "none",
-              },
-              0.1 + i * 0.08,
-            );
-          });
-          tl.to(cardsFlutuantes, { opacity: 0, duration: 0.12, ease: "none" }, 0.86);
-
-          // O CTA desce pro canto inferior esquerdo (vira o botão da sidebar).
-          if (ctaRef.current) {
-            const cta = ctaRef.current;
-            tl.to(
-              cta,
-              {
-                x: () => 48 - cta.getBoundingClientRect().left,
-                y: () => window.innerHeight * 0.84 - cta.getBoundingClientRect().top,
-                ease: "none",
-              },
-              0.3,
-            );
-            tl.to(cta, { opacity: 0, duration: 0.1, ease: "none" }, 0.88);
-          }
-
-          // O nome-logo se despede por último.
-          tl.to(nomeRef.current, { opacity: 0, duration: 0.1, ease: "none" }, 0.9);
-        },
-      );
+        // 0.85→1: buffer parado (absorve o atraso do scrub antes da troca).
+        tl.to({}, { duration: 0.15 }, 0.85);
+      });
 
       return () => mm.revert();
     },
@@ -247,11 +322,12 @@ export function Hero() {
     <section ref={root} id="topo" className="relative w-full overflow-hidden pb-16 pt-6 md:pt-10">
       <div className="relative mx-auto w-full max-w-[1500px] px-3 md:px-6">
         <div className="relative mx-auto w-full">
-          {/* Nome gigante dourado: base apagada + camada acesa pelo holofote. */}
+          {/* Nome gigante dourado: base + camada acesa pelo holofote. */}
           <svg
             ref={nomeRef}
             viewBox="0 0 1000 250"
             className="block h-auto w-full select-none"
+            style={{ transformBox: "fill-box", transformOrigin: "0% 0%" }}
             aria-hidden="true"
           >
             <defs>
@@ -298,23 +374,34 @@ export function Hero() {
             </text>
           </svg>
 
-          {/* Foto cravada no vão B|R: a div EXTERNA só posiciona (o JS mede o
-              vão); a INTERNA recebe parallax e blur sem nunca tocar na posição. */}
+          {/* Foto cravada no vão B|R: a div EXTERNA posiciona; a INTERNA leva
+              parallax e o crossfade nítida/borrada (blur fixo em camada). */}
           <div
             ref={fotoPosRef}
             className="pointer-events-none absolute z-10 aspect-[1122/1402]"
             style={{ width: "clamp(240px, 44%, 660px)", top: "-62%", left: "49%", transform: "translateX(-47.7%)" }}
           >
             <div ref={fotoRef} className="absolute inset-0">
-              <Image
-                src="/fotominha.png"
-                alt=""
-                fill
-                priority
-                sizes="(max-width: 768px) 60vw, 44vw"
-                className="object-contain"
-                onLoad={() => ScrollTrigger.refresh()}
-              />
+              <div ref={fotoNitidaRef} className="absolute inset-0">
+                <Image
+                  src="/fotominha.png"
+                  alt=""
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 60vw, 44vw"
+                  className="object-contain"
+                  onLoad={() => ScrollTrigger.refresh()}
+                />
+              </div>
+              <div ref={fotoBorradaRef} className="absolute inset-0 opacity-0 blur-2xl">
+                <Image
+                  src="/fotominha.png"
+                  alt=""
+                  fill
+                  sizes="(max-width: 768px) 60vw, 44vw"
+                  className="object-contain"
+                />
+              </div>
             </div>
           </div>
 
@@ -323,12 +410,12 @@ export function Hero() {
           </h1>
           <p className="sr-only">{stats.map((s) => `${s.valor} ${s.rotulo}`).join(". ")}.</p>
 
-          {/* Stat-cards flutuando sobre o nome, com parallax. */}
+          {/* Stat-cards flutuando sobre o nome, com parallax; voam pra sidebar. */}
           <div className="pointer-events-none absolute inset-0 z-20 hidden md:block" aria-hidden>
-            <div className="absolute left-[3%] top-[62%]" data-depth="1.4">
+            <div className="absolute left-[3%] top-[62%]" data-depth="1.4" data-fly="stat-0">
               <StatCard valor={stats[0].valor} rotulo={stats[0].rotulo} />
             </div>
-            <div className="absolute right-[3%] top-[8%]" data-depth="0.8">
+            <div className="absolute right-[3%] top-[8%]" data-depth="0.8" data-fly="stat-1">
               <StatCard valor={stats[1].valor} rotulo={stats[1].rotulo} />
             </div>
           </div>
@@ -340,15 +427,15 @@ export function Hero() {
             <a href="#historia" className="inline-block py-2 text-muted transition-colors hover:text-accent">
               Sobre mim
             </a>
-          </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-2">
             <a href="#projetos" className="inline-block py-2 text-muted transition-colors hover:text-accent">
               Projetos
             </a>
+          </div>
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
             <a href="#trajetoria" className="inline-block py-2 text-muted transition-colors hover:text-accent">
               Trajetória
             </a>
-            <a href="#contato" className="inline-block py-2 text-accent transition-colors hover:text-accent-hi">
+            <a href="#contato" className="hero-solto inline-block py-2 text-accent transition-colors hover:text-accent-hi">
               Contato
             </a>
           </div>
