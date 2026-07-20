@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { gsap, useGSAP, ScrollTrigger } from "@/lib/gsap";
 import { perfil, chipsPerfil, palavrasHero } from "@/lib/dados";
 import { WordRotator } from "@/components/word-rotator";
@@ -25,6 +25,27 @@ export function Hero() {
   const spotRef = useRef<SVGCircleElement>(null);
   const ctaRef = useMagnetic<HTMLAnchorElement>();
   const cta2Ref = useMagnetic<HTMLAnchorElement>();
+
+  // A foto fica cravada no vão entre o B e o R: mede a largura real dos
+  // glifos (a proporção sobrevive ao esticamento do textLength) e alinha o
+  // centro da CABEÇA (47,7% do PNG, medido no alfa) nesse vão.
+  useEffect(() => {
+    const posicionar = () => {
+      const texto = textoBaseRef.current;
+      const foto = fotoRef.current;
+      if (!texto || !foto) return;
+      try {
+        const total = texto.getSubStringLength(0, NOME.length);
+        const ateB = texto.getSubStringLength(0, 3); // G, A, B
+        foto.style.left = `${(ateB / total) * 100}%`;
+      } catch {
+        /* fonte ainda não pronta; o resize/fonts.ready tenta de novo */
+      }
+    };
+    document.fonts.ready.then(posicionar);
+    window.addEventListener("resize", posicionar);
+    return () => window.removeEventListener("resize", posicionar);
+  }, []);
 
   useGSAP(
     () => {
@@ -123,34 +144,94 @@ export function Hero() {
         };
       });
 
-      // ── Saída no scroll: o palco se recolhe pro canto esquerdo ─────────
+      // ── Saída pinada: o hero PRENDE e cada coisa VOA pra lateral ───────
+      // (como a referência: nome encolhe virando o logo, links empilham à
+      // esquerda em cascata, stats descem pra coluna, CTA vai pro canto,
+      // a foto desfoca até sumir; só então a próxima seção chega.)
       mm.add(
         "(min-width: 900px) and (prefers-reduced-motion: no-preference)",
         () => {
+          const links = gsap.utils.toArray<HTMLElement>(".hero-nav a", root.current);
+          const cardsFlutuantes = gsap.utils.toArray<HTMLElement>("[data-depth]", root.current);
+
           const tl = gsap.timeline({
             scrollTrigger: {
               trigger: root.current,
               start: "top top",
-              end: "bottom 30%",
-              scrub: 0.8,
+              end: "+=130%",
+              scrub: 1,
+              pin: true,
+              anticipatePin: 1,
+              invalidateOnRefresh: true,
             },
           });
+
+          // Nome encolhe pro canto superior esquerdo (vira o "logo").
           tl.to(
             nomeRef.current,
-            { scale: 0.3, y: 170, transformOrigin: "left bottom", ease: "none" },
+            { scale: 0.17, x: 28, y: 16, transformOrigin: "left top", ease: "none" },
             0,
-          )
-            .to(fotoRef.current, { xPercent: -10, yPercent: 22, opacity: 0, ease: "none" }, 0)
-            .to(
-              gsap.utils.toArray<HTMLElement>("[data-depth]", root.current),
-              { x: -200, y: 190, opacity: 0, stagger: 0.06, ease: "none" },
-              0,
-            )
-            .to(
-              gsap.utils.toArray<HTMLElement>(".hero-solto", root.current),
-              { x: -80, y: 60, opacity: 0, stagger: 0.05, ease: "none" },
-              0.08,
+          );
+
+          // A foto desfoca e some (borrão como a referência).
+          tl.to(
+            fotoRef.current,
+            { filter: "blur(18px)", opacity: 0, scale: 1.06, ease: "none" },
+            0.08,
+          );
+
+          // Headline, tagline e chips sobem e saem cedo.
+          tl.to(
+            gsap.utils.toArray<HTMLElement>(".hero-solto", root.current),
+            { y: -70, opacity: 0, stagger: 0.04, ease: "none" },
+            0,
+          );
+
+          // Links da nav voam um a um pra pilha vertical à esquerda (cascata).
+          links.forEach((el, i) => {
+            tl.to(
+              el,
+              {
+                x: () => 48 - el.getBoundingClientRect().left,
+                y: () => window.innerHeight * 0.4 + i * 54 - el.getBoundingClientRect().top,
+                ease: "none",
+              },
+              0.12 + i * 0.07,
             );
+          });
+          tl.to(links, { opacity: 0, duration: 0.12, ease: "none" }, 0.86);
+
+          // Stat-cards descem pra coluna esquerda.
+          cardsFlutuantes.forEach((el, i) => {
+            tl.to(
+              el,
+              {
+                x: () => 48 - el.getBoundingClientRect().left,
+                y: () => window.innerHeight * 0.16 + i * 104 - el.getBoundingClientRect().top,
+                ease: "none",
+              },
+              0.1 + i * 0.08,
+            );
+          });
+          tl.to(cardsFlutuantes, { opacity: 0, duration: 0.12, ease: "none" }, 0.86);
+
+          // O CTA desce pro canto inferior esquerdo (vira o botão da sidebar).
+          if (ctaRef.current) {
+            const cta = ctaRef.current;
+            tl.to(
+              cta,
+              {
+                x: () => 48 - cta.getBoundingClientRect().left,
+                y: () => window.innerHeight * 0.84 - cta.getBoundingClientRect().top,
+                ease: "none",
+              },
+              0.3,
+            );
+            tl.to(cta, { opacity: 0, duration: 0.1, ease: "none" }, 0.88);
+          }
+
+          // O nome-logo se despede por último.
+          tl.to(nomeRef.current, { opacity: 0, duration: 0.1, ease: "none" }, 0.9);
         },
       );
 
@@ -206,8 +287,8 @@ export function Hero() {
           {/* Foto no CENTRO, na frente do nome, cruzando a nav. */}
           <div
             ref={fotoRef}
-            className="pointer-events-none absolute left-1/2 z-10 aspect-[1122/1402]"
-            style={{ width: "clamp(240px, 44%, 660px)", top: "-30%", transform: "translateX(-45.2%)" }}
+            className="pointer-events-none absolute z-10 aspect-[1122/1402]"
+            style={{ width: "clamp(240px, 44%, 660px)", top: "-62%", left: "49%", transform: "translateX(-47.7%)" }}
           >
             <Image
               src="/fotominha.png"
@@ -237,7 +318,7 @@ export function Hero() {
         </div>
 
         {/* Nav dividida em dois grupos, desviando da foto no centro. */}
-        <nav className="hero-solto relative z-20 mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 font-mono text-[0.7rem] uppercase tracking-[0.18em]">
+        <nav className="hero-nav relative z-20 mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 font-mono text-[0.7rem] uppercase tracking-[0.18em]">
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             <a href="#historia" className="inline-block py-2 text-muted transition-colors hover:text-accent">
               Sobre mim
@@ -257,8 +338,8 @@ export function Hero() {
         </nav>
 
         {/* Headline no peito da foto, centrada. */}
-        <div className="hero-solto relative z-20 mx-auto mt-6 flex max-w-3xl flex-col items-center text-center md:mt-2">
-          <h2 className="font-display text-[clamp(2rem,5.2vw,3.9rem)] font-bold leading-[1.03] tracking-tight">
+        <div className="relative z-20 mx-auto mt-6 flex max-w-3xl flex-col items-center text-center md:mt-2">
+          <h2 className="hero-solto font-display text-[clamp(2rem,5.2vw,3.9rem)] font-bold leading-[1.03] tracking-tight">
             Pego um problema e<br />
             não paro até{" "}
             <WordRotator words={palavrasHero} className="text-accent" />
@@ -274,7 +355,7 @@ export function Hero() {
             <a
               ref={cta2Ref}
               href="#historia"
-              className="inline-block rounded-full border border-border bg-bg/70 px-7 py-3.5 font-medium text-text backdrop-blur-sm transition-colors hover:border-accent hover:text-accent"
+              className="hero-solto inline-block rounded-full border border-border bg-bg/70 px-7 py-3.5 font-medium text-text backdrop-blur-sm transition-colors hover:border-accent hover:text-accent"
             >
               Minha história
             </a>

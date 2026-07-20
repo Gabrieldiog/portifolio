@@ -114,7 +114,7 @@ function CardTrabalho({ trabalho }: { trabalho: Trabalho }) {
           <p className="font-display text-5xl font-bold leading-none text-accent-hi tnum md:text-6xl">
             <Contador valor={trabalho.metrica.valor} sufixo={trabalho.metrica.sufixo} />
           </p>
-          <p className="max-w-[12rem] font-mono text-[0.65rem] uppercase leading-snug tracking-[0.12em] text-muted">
+          <p className="max-w-[16rem] text-base font-medium leading-snug text-text">
             {trabalho.metrica.rotulo}
           </p>
         </div>
