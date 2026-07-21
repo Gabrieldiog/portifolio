@@ -1,33 +1,49 @@
-import type { Metadata } from "next";
-import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
+import { LenisProvider } from "@/components/lenis-provider";
+import { MousePlayProvider } from "@/hooks/use-mouse-play";
+import { CursorSpotlight } from "@/components/cursor-spotlight";
+import { SmoothAnchors } from "@/components/smooth-anchors";
+import { ScrollCue } from "@/components/scroll-cue";
 
-// Fraunces: nome, títulos e — a assinatura — os números das métricas.
-const display = Fraunces({
+// Space Grotesk: títulos, nome gigante e números de métrica.
+const display = Space_Grotesk({
   variable: "--fonte-display",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
 });
 
-// Inter: corpo e UI.
-const sans = Inter({
+// Satoshi (Fontshare, self-host): corpo de texto.
+const sans = localFont({
   variable: "--fonte-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  src: [
+    { path: "../fonts/satoshi-400.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/satoshi-500.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/satoshi-700.woff2", weight: "700", style: "normal" },
+  ],
 });
 
-// JetBrains Mono: rótulos, stack e metadados — a "cara técnica".
+// JetBrains Mono: só em rótulos técnicos pontuais (stack, metadados).
 const mono = JetBrains_Mono({
   variable: "--fonte-mono",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
-  title: "Gabriel Diogo — Desenvolvedor Full Stack",
+  title: "Gabriel Diogo · Desenvolvedor Full Stack",
   description:
     "Desenvolvedor full stack de Goiânia. Construo sistemas de ponta a ponta que pessoas de verdade usam todo dia.",
+};
+
+// viewportFit: cover libera as env(safe-area-inset-*) do notch/Dynamic Island.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#0b0b09",
 };
 
 export default function RootLayout({
@@ -38,7 +54,16 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${display.variable} ${sans.variable} ${mono.variable} h-full antialiased`}
     >
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        <LenisProvider>
+          <MousePlayProvider>
+            <SmoothAnchors />
+            <CursorSpotlight />
+            {children}
+            <ScrollCue />
+          </MousePlayProvider>
+        </LenisProvider>
+      </body>
     </html>
   );
 }
