@@ -146,13 +146,14 @@ export function HeroMobile() {
           </div>
         </div>
 
-        {/* Stats à direita. */}
+        {/* 3+ à direita, no topo. */}
         <div className="hm-card z-20 self-start justify-self-end pr-3 pt-[5%]">
           <div className="hm-card-idle">
             <GlassStat valor={stats[0].valor} rotulo={stats[0].rotulo} />
           </div>
         </div>
-        <div className="hm-card z-20 self-start justify-self-end pr-3 pt-[27%]">
+        {/* 15+ à esquerda, logo abaixo do menu hambúrguer. */}
+        <div className="hm-card z-20 self-start justify-self-start pl-[max(1rem,env(safe-area-inset-left))] pt-[4.5rem]">
           <div className="hm-card-idle">
             <GlassStat valor={stats[1].valor} rotulo={stats[1].rotulo} />
           </div>

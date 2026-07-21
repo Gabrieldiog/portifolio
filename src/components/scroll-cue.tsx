@@ -42,14 +42,12 @@ export function ScrollCue() {
       data-oculto="0"
       className="scroll-cue pointer-events-none fixed inset-x-0 bottom-[max(0.9rem,env(safe-area-inset-bottom))] z-40 flex flex-col items-center gap-1"
     >
-      <span className="font-mono text-[0.5rem] uppercase tracking-[0.25em] text-muted">
+      <span className="font-mono text-[0.55rem] uppercase tracking-[0.25em] text-muted lg:text-[0.72rem] lg:tracking-[0.3em]">
         role
       </span>
       <svg
-        width="15"
-        height="15"
         viewBox="0 0 24 24"
-        className="scroll-bounce text-accent [filter:drop-shadow(0_1px_6px_rgba(0,0,0,0.6))]"
+        className="scroll-bounce h-4 w-4 text-accent [filter:drop-shadow(0_1px_6px_rgba(0,0,0,0.6))] lg:h-6 lg:w-6"
         fill="none"
         stroke="currentColor"
         strokeWidth="2.5"

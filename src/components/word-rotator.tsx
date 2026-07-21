@@ -5,18 +5,32 @@ import { gsap, useGSAP } from "@/lib/gsap";
 
 type WordRotatorProps = { words: string[]; interval?: number; className?: string };
 
-// Palavras trocando em loop contínuo, na MESMA linha do "até". Deslizam de baixo
-// pra cima (nunca fica em branco) e ficam encostadas à ESQUERDA da caixa (logo
-// depois do "até"), não centralizadas. A caixa reserva a largura da palavra mais
-// larga com um fantasma invisível, então nada reflui. A parte animada é
-// aria-hidden; o leitor de tela ouve a lista uma vez.
+// Palavras trocando em loop, na MESMA linha do "até". Usa DOIS slots que se
+// revezam: enquanto o da frente sai por cima, o de trás (já com a próxima
+// palavra) sobe pra cena — os dois se sobrepõem, então NUNCA fica em branco.
+// O texto de cada slot é sempre uma palavra de verdade, e a limpeza recoloca a
+// primeira palavra visível: mesmo se o GSAP matar a timeline no meio de uma
+// troca (Fast Refresh), ele volta legível em vez de sumir. Encostado à esquerda
+// (logo depois do "até") e a largura é travada pela palavra mais larga.
 export function WordRotator({ words, interval = 2.2, className }: WordRotatorProps) {
   const root = useRef<HTMLSpanElement>(null);
+  const aRef = useRef<HTMLSpanElement>(null);
+  const bRef = useRef<HTMLSpanElement>(null);
 
   useGSAP(
     () => {
-      const items = gsap.utils.toArray<HTMLElement>(".word-rotator-item", root.current);
-      if (items.length < 2) return;
+      const a = aRef.current;
+      const b = bRef.current;
+      if (!a || !b || words.length < 2) return;
+      const slots = [a, b];
+
+      // Estado base: 1ª palavra no palco, 2ª esperando embaixo. SEMPRE legível.
+      const base = () => {
+        a.textContent = words[0];
+        b.textContent = words[1 % words.length];
+        gsap.set(a, { yPercent: 0, autoAlpha: 1 });
+        gsap.set(b, { yPercent: 100, autoAlpha: 1 });
+      };
 
       const mm = gsap.matchMedia();
       mm.add(
@@ -26,29 +40,34 @@ export function WordRotator({ words, interval = 2.2, className }: WordRotatorPro
         },
         (context) => {
           const { reduce } = context.conditions as { reduce: boolean };
-
-          // Estado base: todas embaixo, a primeira no palco.
-          gsap.set(items, { yPercent: 110 });
-          gsap.set(items[0], { yPercent: 0 });
+          base();
           if (reduce) return; // fica na primeira palavra
 
-          // Esteira determinística: em cada troca, o próximo é PARADO embaixo
-          // (set explícito) e sobe enquanto o atual sai por cima. Sem fromTo /
-          // immediateRender, então nunca trava nem fica em branco no loop.
-          const tl = gsap.timeline({
-            repeat: -1,
-            defaults: { duration: 0.5, ease: "power2.inOut" },
-          });
-          items.forEach((el, i) => {
-            const next = items[(i + 1) % items.length];
-            const marca = `t${i}`;
+          const tl = gsap.timeline({ repeat: -1 });
+          for (let k = 0; k < words.length; k++) {
+            const front = slots[k % 2];
+            const back = slots[(k + 1) % 2];
+            const prox = words[(k + 1) % words.length];
+            const marca = `s${k}`;
             tl.addLabel(marca, `+=${interval}`);
-            tl.set(next, { yPercent: 110 }, marca);
-            tl.to(el, { yPercent: -110 }, marca);
-            tl.to(next, { yPercent: 0 }, marca);
-          });
+            // No rótulo, o slot de trás recebe a próxima palavra e é posto
+            // embaixo (via callback, no runtime — nada de render antecipado).
+            tl.call(
+              () => {
+                back.textContent = prox;
+                gsap.set(back, { yPercent: 100, autoAlpha: 1 });
+              },
+              undefined,
+              marca,
+            );
+            tl.to(front, { yPercent: -100, duration: 0.5, ease: "power2.inOut" }, marca);
+            tl.to(back, { yPercent: 0, duration: 0.5, ease: "power2.inOut" }, marca);
+          }
 
-          return () => tl.kill();
+          return () => {
+            tl.kill();
+            base(); // nunca deixa em branco
+          };
         },
       );
 
@@ -62,23 +81,19 @@ export function WordRotator({ words, interval = 2.2, className }: WordRotatorPro
       ref={root}
       className={`relative inline-block h-[1.15em] translate-y-[0.12em] overflow-hidden text-left align-bottom ${className ?? ""}`}
     >
-      <span aria-hidden className="relative block h-full">
-        {/* Fantasma (h-0): dá a LARGURA da palavra mais larga em pixels. */}
-        <span className="invisible block h-0 overflow-hidden">
-          {words.map((word) => (
-            <span key={word} className="block whitespace-nowrap">
-              {word}
-            </span>
-          ))}
-        </span>
+      {/* Fantasma (h-0): trava a LARGURA na palavra mais larga. */}
+      <span aria-hidden className="invisible block h-0 overflow-hidden">
         {words.map((word) => (
-          <span
-            key={word}
-            className="word-rotator-item absolute inset-0 whitespace-nowrap text-left"
-          >
+          <span key={word} className="block whitespace-nowrap">
             {word}
           </span>
         ))}
+      </span>
+      <span ref={aRef} aria-hidden className="absolute inset-0 whitespace-nowrap text-left">
+        {words[0]}
+      </span>
+      <span ref={bRef} aria-hidden className="absolute inset-0 whitespace-nowrap text-left">
+        {words[1 % words.length]}
       </span>
       <span className="sr-only">{words.join(", ")}</span>
     </span>

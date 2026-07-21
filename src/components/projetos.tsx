@@ -114,6 +114,9 @@ function CardProjeto({ projeto, indice }: { projeto: Projeto; indice: number }) 
         alt={`Tela do ${projeto.nome}`}
         fill
         sizes="(max-width: 900px) 80vw, 420px"
+        // Vitrine que corre na horizontal por transform: o lazy do último card
+        // não dispara direito, então carrega tudo de vez (são poucas imagens).
+        loading="eager"
         className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.05]"
       />
       {/* Véu pra leitura do texto sobre o print. */}
