@@ -1,54 +1,36 @@
 "use client";
 
-import { useRef } from "react";
-import { gsap, useGSAP } from "@/lib/gsap";
+import { useReveal } from "@/hooks/use-reveal";
 import { formacao, competencias } from "@/lib/dados";
 import { useTilt } from "@/hooks/use-tilt";
 
-// Formação, cursos, idiomas e o arsenal. Cards com hover e entrada em cascata.
+// Formação, cursos, idiomas e o arsenal. Título e cards se apresentam ao entrar,
+// na mesma pegada do resto da história.
 export function Formacao() {
-  const root = useRef<HTMLElement>(null);
-
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.from(gsap.utils.toArray<HTMLElement>(".form-card", root.current), {
-          opacity: 0,
-          y: 36,
-          duration: 0.6,
-          ease: "power3.out",
-          stagger: 0.1,
-          scrollTrigger: {
-            trigger: root.current,
-            start: "top 72%",
-            once: true,
-          },
-        });
-      });
-
-      return () => mm.revert();
-    },
-    { scope: root },
-  );
+  const root = useReveal<HTMLElement>();
 
   return (
-    <section ref={root} id="formacao" className="border-t border-line py-24 md:py-32">
-      <div className="mx-auto grid max-w-[1500px] gap-12 px-6 md:grid-cols-[1fr_1fr] md:gap-16 md:px-10">
+    <section ref={root} id="formacao" className="py-20 md:py-28">
+      <div className="mx-auto grid max-w-[1500px] gap-12 px-6 md:grid-cols-[1fr_1fr] md:gap-16 md:px-10 motion-safe:lg:pl-[var(--rail-inset)]">
         <div>
-          <p className="inline-block rounded-full border border-accent/40 px-4 py-1.5 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-accent">
+          <p
+            data-reveal
+            className="inline-block rounded-full border border-accent/40 px-4 py-1.5 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-accent"
+          >
             Formação e base
           </p>
-          <h2 className="mt-5 font-display text-4xl font-bold leading-tight tracking-tight md:text-5xl">
+          <h2
+            data-reveal
+            className="mt-5 font-display text-4xl font-bold leading-tight tracking-tight md:text-5xl"
+          >
             Levo o estudo a sério.
           </h2>
-          <p className="mt-4 max-w-md text-lg font-medium leading-snug text-text">
+          <p data-reveal className="mt-4 max-w-md text-lg font-medium leading-snug text-text">
             Faculdade em andamento, cursos sempre que dá e{" "}
             <span className="text-accent">código escrito com a própria mão.</span>
           </p>
 
-          <CardTilt className="form-card mt-8 rounded-3xl border border-border bg-surface p-6 transition-colors hover:border-accent/50">
+          <CardTilt className="mt-8 rounded-3xl border border-border bg-surface p-6 transition-colors hover:border-accent/50">
             <p className="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-faint">
               Graduação
             </p>
@@ -60,7 +42,7 @@ export function Formacao() {
             </p>
           </CardTilt>
 
-          <CardTilt className="form-card mt-5 rounded-3xl border border-border bg-surface p-6 transition-colors hover:border-accent/50">
+          <CardTilt className="mt-5 rounded-3xl border border-border bg-surface p-6 transition-colors hover:border-accent/50">
             <p className="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-faint">
               Cursos
             </p>
@@ -74,7 +56,7 @@ export function Formacao() {
             </ul>
           </CardTilt>
 
-          <div className="form-card mt-5 flex flex-wrap gap-2">
+          <div data-reveal className="mt-5 flex flex-wrap gap-2">
             {formacao.idiomas.map((i) => (
               <span
                 key={i}
@@ -87,12 +69,12 @@ export function Formacao() {
         </div>
 
         <div className="md:pt-20">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted">
+          <p data-reveal className="font-mono text-xs uppercase tracking-[0.2em] text-muted">
             Com o que eu construo
           </p>
           <div className="mt-6 space-y-6">
             {competencias.map((c) => (
-              <div key={c.grupo} className="form-card">
+              <div key={c.grupo} data-reveal>
                 <p className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-faint">
                   {c.grupo}
                 </p>
@@ -115,11 +97,11 @@ export function Formacao() {
   );
 }
 
-// Card com tilt 3D leve no mouse.
+// Card com tilt 3D leve no mouse (e que se apresenta ao entrar).
 function CardTilt({ className, children }: { className?: string; children: React.ReactNode }) {
   const ref = useTilt<HTMLDivElement>({ max: 4 });
   return (
-    <div ref={ref} className={className}>
+    <div ref={ref} data-reveal className={className}>
       {children}
     </div>
   );

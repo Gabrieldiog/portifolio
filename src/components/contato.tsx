@@ -1,5 +1,8 @@
+"use client";
+
 import { contato, perfil } from "@/lib/dados";
 import { CopiarEmail } from "./copiar-email";
+import { useReveal } from "@/hooks/use-reveal";
 
 // Ícones das redes (SVG inline). A cor oficial de cada marca vem do canal.
 const icones: Record<string, React.ReactNode> = {
@@ -26,26 +29,34 @@ const canais = [
 ];
 
 export function Contato() {
+  const root = useReveal<HTMLElement>();
+
   return (
-    <footer id="contato" className="border-t border-line py-24 md:py-32">
-      <div className="mx-auto max-w-[1500px] px-6 md:px-10">
-        <p className="inline-block rounded-full border border-accent/40 px-4 py-1.5 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-accent">
+    <footer ref={root} id="contato" className="py-24 md:py-32">
+      <div className="mx-auto max-w-[1500px] px-6 md:px-10 motion-safe:lg:pl-[var(--rail-inset)]">
+        <p
+          data-reveal
+          className="inline-block rounded-full border border-accent/40 px-4 py-1.5 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-accent"
+        >
           Contato
         </p>
-        <h2 className="mt-5 max-w-3xl font-display text-4xl font-bold leading-tight tracking-tight md:text-6xl">
+        <h2
+          data-reveal
+          className="mt-5 max-w-3xl font-display text-4xl font-bold leading-tight tracking-tight md:text-6xl"
+        >
           Vamos trabalhar <span className="text-accent">juntos?</span>
         </h2>
-        <p className="mt-5 max-w-xl text-lg font-medium leading-snug text-text">
+        <p data-reveal className="mt-5 max-w-xl text-lg font-medium leading-snug text-text">
           Disponível pra vaga presencial, remota ou híbrida,{" "}
           <span className="text-accent">com início imediato.</span>
         </p>
-        <p className="mt-2 max-w-xl leading-relaxed text-muted">
+        <p data-reveal className="mt-2 max-w-xl leading-relaxed text-muted">
           Freelas e projetos também são bem-vindos. Me chama que a gente conversa.
         </p>
 
         <div className="mt-10 grid gap-8 md:grid-cols-[1fr_1.1fr] md:items-stretch">
           {/* Card de contato: e-mail em destaque + as redes com logo colorida. */}
-          <div className="rounded-3xl border border-border bg-surface p-6 md:p-8">
+          <div data-reveal className="rounded-3xl border border-border bg-surface p-6 md:p-8">
             <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-faint">
               Me chama por aqui
             </p>
@@ -54,17 +65,18 @@ export function Contato() {
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
-              {canais.map((c) => (
+              {canais.map((c, i) => (
                 <a
                   key={c.id}
                   href={c.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-3 rounded-2xl border border-border bg-surface-2 px-4 py-3.5 transition-colors hover:border-accent/60"
+                  style={{ animationDelay: `${i * 0.6}s` }}
+                  className="canal-card group flex items-center gap-3 rounded-2xl border border-border bg-surface-2 px-4 py-3.5 transition-[transform,border-color] hover:-translate-y-0.5 hover:border-accent/60"
                 >
                   <span
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-bg"
-                    style={{ color: c.cor }}
+                    className="canal-icone flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-bg"
+                    style={{ color: c.cor, animationDelay: `${i * 0.35}s` }}
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                       {icones[c.id]}
@@ -82,7 +94,7 @@ export function Contato() {
           </div>
 
           {/* Resumo profissional (no lugar do vídeo, por enquanto). */}
-          <div className="flex flex-col justify-center rounded-3xl border border-border bg-surface p-6 md:p-8">
+          <div data-reveal className="flex flex-col justify-center rounded-3xl border border-border bg-surface p-6 md:p-8">
             <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-faint">
               Resumo
             </p>

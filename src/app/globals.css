@@ -22,11 +22,105 @@
 
 :root {
   color-scheme: dark;
+
+  /* Geometria da rail fixa (desktop) e o recuo que as seções dão pra ela.
+     --rail-left alinha a rail com a borda de conteúdo do container centrado. */
+  --rail-w: 300px;
+  --rail-left: max(2.5rem, calc((100vw - 1500px) / 2 + 2.5rem));
+  --rail-inset: calc(5rem + var(--rail-w));
+}
+
+/* A rail nunca estoura a tela: em telas baixas a coluna rola por dentro, e aí
+   a barra fina APARECE (é a única pista de que há mais abaixo — sem ela o CTA
+   ficaria cortado sem aviso). Em telas normais não transborda, então some. */
+#rail {
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+/* Itens de navegação da rail e do drawer. O scroll-spy acende o atual. */
+.rail-link {
+  color: var(--color-muted);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.rail-link:hover {
+  color: var(--color-text);
+  background: var(--color-surface-2);
+}
+.rail-link.is-active {
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-weight: 500;
 }
 
 /* NUNCA "smooth" aqui: briga com o Lenis (anchor links engasgam). */
 html {
   scroll-behavior: auto;
+}
+
+/* Galeria de projetos (desktop com movimento): os cards somem suavemente ao
+   passar pela faixa da rail fixa — nada de conteúdo espiando pelos vãos dela. */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .proj-wrap {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--rail-inset));
+    mask-image: linear-gradient(to right, transparent, #000 var(--rail-inset));
+  }
+}
+
+/* Ícones dos canais de contato: respiram sozinhos, sem precisar do mouse. */
+@media (prefers-reduced-motion: no-preference) {
+  .canal-icone {
+    animation: canal-pulse 2.8s ease-in-out infinite;
+    will-change: transform;
+  }
+  /* Indicador de "role pra baixo": a setinha pula devagar. */
+  .scroll-bounce {
+    animation: scroll-bounce 1.6s ease-in-out infinite;
+  }
+  /* Cards de contato: um brilho dourado que respira sozinho (sem hover). */
+  .canal-card {
+    animation: canal-glow 3s ease-in-out infinite;
+  }
+}
+/* Indicador global de rolagem (fixo no rodapé): aparece na página toda e some
+   suavemente ao chegar perto do fim. */
+.scroll-cue {
+  opacity: 0.9;
+  transition: opacity 0.45s ease;
+}
+.scroll-cue[data-oculto="1"] {
+  opacity: 0;
+}
+
+@keyframes canal-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(212, 160, 23, 0);
+  }
+  50% {
+    box-shadow: 0 0 22px -6px rgba(212, 160, 23, 0.45);
+  }
+}
+@keyframes scroll-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translateY(4px);
+    opacity: 1;
+  }
+}
+@keyframes canal-pulse {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-2px) scale(1.1);
+  }
 }
 
 body {

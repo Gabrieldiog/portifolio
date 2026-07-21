@@ -92,7 +92,7 @@ export const projetos: Projeto[] = [
     id: "fox",
     nome: "Fox Finance",
     descricao:
-      "App de gestão financeira pessoal com usuárias reais: cada conta é privada e isolada, com senha protegida por Argon2id e teste automatizado que garante que um usuário nunca lê os dados do outro.",
+      "App de gestão financeira pessoal usado por 3 usuárias reais: cada conta é privada e isolada, com senha protegida e um teste automatizado que garante que uma usuária nunca lê os dados da outra.",
     stack: ["Next.js", "TypeScript", "PostgreSQL", "Drizzle"],
     link: "https://fox-finance.vercel.app",
     repo: "https://github.com/Gabrieldiog/FOX-finance",

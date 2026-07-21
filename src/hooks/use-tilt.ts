@@ -4,8 +4,9 @@ import { useRef } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { useMousePlay } from "@/hooks/use-mouse-play";
 
-// Tilt 3D leve em cards: rotação limitada seguindo o cursor.
-export function useTilt<T extends HTMLElement>({ max = 6 } = {}) {
+// Tilt 3D leve: o card inclina na direção do cursor (rotateX/rotateY) e volta
+// no leave. rect recalculado no pointerenter. Só com mouse de verdade.
+export function useTilt<T extends HTMLElement>({ max = 4 } = {}) {
   const ref = useRef<T>(null);
   const play = useMousePlay();
 
@@ -13,36 +14,32 @@ export function useTilt<T extends HTMLElement>({ max = 6 } = {}) {
     if (!play || !ref.current) return;
     const el = ref.current;
     let rect = el.getBoundingClientRect();
-    const updateRect = () => {
+
+    const rotX = gsap.quickTo(el, "rotationX", { duration: 0.5, ease: "power3" });
+    const rotY = gsap.quickTo(el, "rotationY", { duration: 0.5, ease: "power3" });
+
+    const onEnter = () => {
       rect = el.getBoundingClientRect();
+      gsap.set(el, { transformPerspective: 800, transformOrigin: "center" });
     };
-
-    gsap.set(el, { transformPerspective: 800, transformStyle: "preserve-3d" });
-
-    const rotateX = gsap.quickTo(el, "rotateX", { duration: 0.5, ease: "power3" });
-    const rotateY = gsap.quickTo(el, "rotateY", { duration: 0.5, ease: "power3" });
-
     const onMove = (e: PointerEvent) => {
-      const px = (e.clientX - rect.left) / rect.width;
-      const py = (e.clientY - rect.top) / rect.height;
-      rotateY(gsap.utils.mapRange(0, 1, -max, max, px));
-      rotateX(gsap.utils.mapRange(0, 1, max, -max, py));
+      const px = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
+      const py = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
+      rotY(px * max);
+      rotX(-py * max);
     };
     const onLeave = () => {
-      rotateX(0);
-      rotateY(0);
+      rotX(0);
+      rotY(0);
     };
 
-    el.addEventListener("pointerenter", updateRect);
+    el.addEventListener("pointerenter", onEnter);
     el.addEventListener("pointermove", onMove, { passive: true });
     el.addEventListener("pointerleave", onLeave);
-    window.addEventListener("resize", updateRect);
-
     return () => {
-      el.removeEventListener("pointerenter", updateRect);
+      el.removeEventListener("pointerenter", onEnter);
       el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerleave", onLeave);
-      window.removeEventListener("resize", updateRect);
     };
   }, { dependencies: [play, max], revertOnUpdate: true });
 

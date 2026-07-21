@@ -6,7 +6,8 @@ import { gsap, useGSAP, ScrollTrigger } from "@/lib/gsap";
 import { perfil, chipsPerfil, palavrasHero, historia } from "@/lib/dados";
 import { WordRotator } from "@/components/word-rotator";
 import { useMagnetic } from "@/hooks/use-magnetic";
-import { SidebarSobre } from "@/components/sidebar-sobre";
+import { DESKTOP, MOBILE_MOTION } from "@/lib/breakpoints";
+import { HeroMobile } from "@/components/hero-mobile";
 
 const NOME = perfil.nomeGigante; // GABRIEL
 const APELIDO = "DIOGO";
@@ -17,7 +18,7 @@ const OURO_ACESO = "#ffdd66";
 
 const stats = [
   { valor: "3+", rotulo: "anos de experiência" },
-  { valor: "15+", rotulo: "sistemas construídos" },
+  { valor: "15+", rotulo: "sistemas profissionais" },
 ];
 
 // Quanto do scroll (em viewports) cada fase ocupa.
@@ -48,7 +49,6 @@ export function PalcoSobre() {
   const ctaRef = useRef<HTMLAnchorElement>(null); // o voo cuida dele; imã só no cta2
   const cta2Ref = useMagnetic<HTMLAnchorElement>();
 
-  const sidebarRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLLIElement | null)[]>([]);
   const linhaRef = useRef<SVGPathElement>(null);
@@ -170,7 +170,7 @@ export function PalcoSobre() {
       // ── A timeline mestra do palco ─────────────────────────────────────
       mm.add(
         {
-          isDesktop: "(min-width: 900px) and (min-height: 800px)",
+          isDesktop: DESKTOP,
           reduceMotion: "(prefers-reduced-motion: reduce)",
         },
         (context) => {
@@ -182,8 +182,10 @@ export function PalcoSobre() {
 
           const heroLayer = heroLayerRef.current;
           const sobreLayer = sobreLayerRef.current;
-          const sidebar = sidebarRef.current;
-          if (!heroLayer || !sobreLayer || !sidebar) return;
+          // A sidebar agora é a rail FIXA no nível da página (persiste por todas
+          // as seções). O voo pousa nela; ela se monta aqui e nunca mais sai.
+          const rail = document.getElementById("rail");
+          if (!heroLayer || !sobreLayer || !rail) return;
 
           // No pin, as duas camadas se sobrepõem num palco de 1 viewport.
           gsap.set(root.current, { height: "100vh", overflow: "hidden" });
@@ -196,7 +198,7 @@ export function PalcoSobre() {
           });
           gsap.set(sobreLayer, { zIndex: 30, pointerEvents: "none" });
 
-          const cartoes = gsap.utils.toArray<HTMLElement>(".sobre-card", sidebar);
+          const cartoes = gsap.utils.toArray<HTMLElement>(".rail-card", rail);
           const cards = cardRefs.current.filter((el): el is HTMLLIElement => el !== null);
           const header = headerRef.current;
           const linha = linhaRef.current;
@@ -212,7 +214,7 @@ export function PalcoSobre() {
           gsap.set(cards, { position: "absolute", inset: 0, margin: "auto" });
           gsap.set(cards, { autoAlpha: 0, x: -110, y: 90 });
 
-          const alvoDe = (sel: string) => sidebar.querySelector<HTMLElement>(sel);
+          const alvoDe = (sel: string) => rail.querySelector<HTMLElement>(sel);
           const voo = (fonte: Element | null, sel: string, comEscala = false) => ({
             x: () => {
               const t = alvoDe(sel);
@@ -343,6 +345,9 @@ export function PalcoSobre() {
           // interação e seleção de texto passam pra quem está visível.
           tl.set(sobreLayer, { pointerEvents: "auto" }, EXIT - 0.25);
           tl.set(heroLayer, { pointerEvents: "none" }, EXIT - 0.25);
+          // A rail só fica clicável depois de montada (antes é invisível e não
+          // pode roubar cliques do hero cheio à esquerda).
+          tl.set(rail, { pointerEvents: "auto" }, EXIT - 0.25);
           if (linhaSvgRef.current) {
             tl.to(linhaSvgRef.current, { autoAlpha: 1, duration: 0.2 }, EXIT - 0.35);
           }
@@ -390,26 +395,73 @@ export function PalcoSobre() {
             tl.addLabel(`cap-${i}`, EXIT + i);
           });
 
-          // Âncora #historia: com o pin, o id aponta pro topo da página;
-          // intercepta e rola pro ponto da timeline onde o Sobre existe.
-          const st = tl.scrollTrigger;
-          const irPraHistoria = (e: Event) => {
-            e.preventDefault();
-            if (!st) return;
-            gsap.to(window, {
-              scrollTo: st.labelToScroll("cap-0"),
-              duration: 1,
-              ease: "power2.inOut",
-            });
-          };
-          const ancoras = Array.from(
-            document.querySelectorAll<HTMLAnchorElement>('a[href="#historia"]'),
-          );
-          ancoras.forEach((a) => a.addEventListener("click", irPraHistoria));
+          // A navegação por âncora (#historia → cap-0, etc.) é suave e global,
+          // resolvida pelo SmoothAnchors lendo a label "cap-0" desta timeline.
+        },
+      );
 
-          return () => {
-            ancoras.forEach((a) => a.removeEventListener("click", irPraHistoria));
-          };
+      // ── Celular: os capítulos ganham o MESMO efeito do desktop. A seção PINA
+      // (você fica parado) e os capítulos passam um a um enquanto você rola, com
+      // a linha do tempo desenhando. Só transform/opacity + scrub 0.6 pra ficar
+      // liso no touch (o ignoreMobileResize já mata o pulo da barra do iOS).
+      mm.add(MOBILE_MOTION, () => {
+          const sobreLayer = sobreLayerRef.current;
+          const ol = olRef.current;
+          const box = sobreLayer?.querySelector<HTMLElement>(".sobre-box");
+          const col = sobreLayer?.querySelector<HTMLElement>(".caps-col");
+          const linha = linhaRef.current;
+          const ponto = pontoRef.current;
+          const linhaSvg = linhaSvgRef.current;
+          const cards = cardRefs.current.filter((el): el is HTMLLIElement => el !== null);
+          if (!sobreLayer || !ol || !box || !col || !cards.length) return;
+
+          const caps = cards.length;
+
+          // A seção vira um palco de 1 tela: título em cima, capítulos empilhados
+          // no mesmo lugar (um visível por vez).
+          gsap.set(box, { minHeight: 0, height: "100svh", paddingTop: 0, paddingBottom: 0, alignItems: "stretch" });
+          gsap.set(col, { minHeight: 0, height: "100svh", justifyContent: "flex-start", paddingTop: "11svh" });
+          gsap.set(ol, { position: "relative", display: "block", height: "64svh", margin: "0 auto" });
+          gsap.set(cards, { position: "absolute", top: "50%", left: 0, right: 0, yPercent: -50, autoAlpha: 0, y: 44 });
+          gsap.set(cards[0], { autoAlpha: 1, y: 0 });
+          if (linhaSvg) gsap.set(linhaSvg, { autoAlpha: 1 });
+
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              id: "sobre-mobile",
+              trigger: sobreLayer,
+              start: "top top",
+              end: () => `+=${(caps - 0.5) * window.innerHeight}`,
+              scrub: 0.6,
+              pin: true,
+              anticipatePin: 1,
+              fastScrollEnd: true,
+              invalidateOnRefresh: true,
+            },
+          });
+
+          // A linha do tempo desenha do primeiro ao último capítulo.
+          if (linha) {
+            gsap.set(linha, { strokeDasharray: 100, strokeDashoffset: 100 });
+            tl.to(linha, { strokeDashoffset: 0, duration: caps - 1, ease: "none" }, 0);
+          }
+          if (ponto && linha) {
+            tl.to(
+              ponto,
+              { motionPath: { path: linha, align: linha, alignOrigin: [0.5, 0.5] }, duration: caps - 1, ease: "none" },
+              0,
+            );
+          }
+
+          // Capítulos passam um a um (cada um leva ~1 tela de rolagem).
+          tl.addLabel("cap-0", 0);
+          cards.forEach((el, i) => {
+            if (i > 0) {
+              tl.to(cards[i - 1], { autoAlpha: 0, y: -44, duration: 0.45, ease: "power1.in" }, i - 0.55);
+              tl.to(el, { autoAlpha: 1, y: 0, duration: 0.45, ease: "power1.out" }, i - 0.45);
+              tl.addLabel(`cap-${i}`, i);
+            }
+          });
         },
       );
 
@@ -420,10 +472,13 @@ export function PalcoSobre() {
 
   return (
     <section ref={root} id="topo" className="relative w-full overflow-hidden">
-      {/* ── CAMADA HERO ─────────────────────────────────────────────────── */}
-      <div ref={heroLayerRef} className="relative w-full pb-16 pt-6 md:pt-10">
+      {/* No celular, um hero próprio com a pessoa no centro (desktop fica hidden). */}
+      <HeroMobile />
+
+      {/* ── CAMADA HERO (desktop) ───────────────────────────────────────── */}
+      <div ref={heroLayerRef} className="relative hidden w-full pb-16 pt-6 md:pt-10 lg:block">
         <div className="relative mx-auto w-full max-w-[1500px] px-3 md:px-6">
-          <div className="relative mx-auto w-full">
+          <div className="hero-reveal relative mx-auto w-full">
             <div ref={nomeVooRef} style={{ transformOrigin: "0% 0%" }}>
             <svg
               ref={nomeRef}
@@ -479,8 +534,8 @@ export function PalcoSobre() {
             {/* Foto cravada no vão B|R (externa posiciona, interna anima). */}
             <div
               ref={fotoPosRef}
-              className="pointer-events-none absolute z-10 aspect-[1122/1402]"
-              style={{ width: "clamp(240px, 44%, 660px)", top: "-62%", left: "49%", transform: "translateX(-47.7%)" }}
+              className="pointer-events-none absolute z-10 aspect-[964/2046]"
+              style={{ width: "clamp(190px, 30%, 430px)", top: "-16%", left: "49%", transform: "translateX(-50%)" }}
             >
               <div ref={fotoDriftRef} className="absolute inset-0">
               <div ref={fotoRef} className="absolute inset-0">
@@ -527,7 +582,7 @@ export function PalcoSobre() {
             </div>
           </div>
 
-          <nav className="hero-nav relative z-20 mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 font-mono text-[0.7rem] uppercase tracking-[0.18em]">
+          <nav className="hero-nav relative z-20 mt-4 hidden flex-wrap items-center justify-between gap-x-6 gap-y-2 font-mono text-[0.7rem] uppercase tracking-[0.18em] lg:flex">
             <div className="flex flex-wrap gap-x-6 gap-y-2">
               <a href="#historia" className="inline-block py-2 text-muted transition-colors hover:text-accent">
                 Sobre mim
@@ -546,7 +601,7 @@ export function PalcoSobre() {
             </div>
           </nav>
 
-          <div className="relative z-20 mx-auto mt-6 flex max-w-3xl flex-col items-center text-center md:mt-2">
+          <div className="hero-reveal relative z-20 mx-auto mt-6 flex max-w-3xl flex-col items-center text-center md:mt-2">
             <h2 className="hero-solto font-display text-[clamp(2rem,5.2vw,3.9rem)] font-bold leading-[1.03] tracking-tight">
               Pego um problema e<br />
               não paro até{" "}
@@ -570,13 +625,13 @@ export function PalcoSobre() {
             </div>
           </div>
 
-          <div className="hero-solto relative z-20 mt-12 flex flex-col justify-between gap-8 md:flex-row md:items-end">
-            <div className="max-w-sm">
-              <p className="text-lg font-medium leading-snug">
+          <div className="hero-reveal hero-solto relative z-20 mt-12 flex flex-col justify-between gap-8 md:flex-row md:items-end">
+            <div className="max-w-md">
+              <p className="text-2xl font-semibold leading-snug">
                 Calmo no processo,<br />
                 <span className="text-accent">certeiro na entrega.</span>
               </p>
-              <p className="mt-3 text-sm leading-relaxed text-muted">
+              <p className="mt-3 text-base leading-relaxed text-muted">
                 {perfil.cargo} em {perfil.local}. Construo sistemas de ponta a
                 ponta que gente de verdade usa todo dia.
               </p>
@@ -594,7 +649,7 @@ export function PalcoSobre() {
             </ul>
           </div>
 
-          <div className="relative z-20 mt-10 grid grid-cols-2 gap-3 md:hidden" aria-hidden>
+          <div className="hero-reveal relative z-20 mt-10 grid grid-cols-2 gap-3 md:hidden" aria-hidden>
             {stats.map((s) => (
               <StatCard key={s.rotulo} valor={s.valor} rotulo={s.rotulo} />
             ))}
@@ -604,19 +659,16 @@ export function PalcoSobre() {
 
       {/* ── CAMADA SOBRE (sidebar + capítulos) ──────────────────────────── */}
       <div ref={sobreLayerRef} id="historia" className="relative w-full">
-        <p className="absolute left-6 top-8 z-10 font-mono text-xs uppercase tracking-[0.2em] text-accent min-[900px]:hidden">
+        <p className="absolute left-6 top-8 z-10 font-mono text-xs uppercase tracking-[0.2em] text-accent lg:hidden">
           Minha história
         </p>
 
-        <div className="mx-auto grid min-h-screen w-full max-w-[1500px] items-center gap-10 px-6 py-20 min-[900px]:h-full min-[900px]:grid-cols-[300px_1fr] min-[900px]:px-10 min-[900px]:py-0">
-          {/* A sidebar REAL: se monta em cena e nunca mais se move. */}
-          <div ref={sidebarRef} className="hidden min-[900px]:block">
-            <SidebarSobre />
-          </div>
-
+        {/* A rail fixa mora à esquerda (nível da página); os capítulos ficam à
+            direita dela, com um recuo que abre espaço pra ela no desktop. */}
+        <div className="sobre-box mx-auto flex min-h-screen w-full max-w-[1500px] items-center px-6 py-20 lg:h-full lg:px-10 lg:py-0 motion-safe:lg:pl-[var(--rail-inset)]">
           {/* Palco dos capítulos: linha do tempo + cards. */}
-          <div className="relative flex min-h-[70vh] flex-col items-center justify-center min-[900px]:h-full min-[900px]:min-h-0">
-            <div ref={headerRef} className="relative z-10 mb-10 w-full max-w-xl self-start min-[900px]:mb-12">
+          <div className="caps-col relative flex min-h-[70vh] w-full flex-col items-center justify-center lg:h-full lg:min-h-0">
+            <div ref={headerRef} className="relative z-10 mb-10 w-full max-w-xl self-start lg:mb-12">
               <p className="inline-block rounded-full border border-accent/40 px-4 py-1.5 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-accent">
                 Do interior pro código
               </p>
@@ -636,7 +688,7 @@ export function PalcoSobre() {
               aria-hidden
               viewBox="0 0 100 100"
               preserveAspectRatio="none"
-              className="pointer-events-none absolute inset-0 z-0 hidden h-full w-full min-[900px]:block"
+              className="pointer-events-none absolute inset-0 z-0 hidden h-full w-full motion-safe:block"
             >
               {/* Trilha completa sempre visível; o progresso acende por cima. */}
               <path

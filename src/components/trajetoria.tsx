@@ -6,62 +6,66 @@ import { trajetoria, alcanceTotal, type Trabalho } from "@/lib/dados";
 import { useTilt } from "@/hooks/use-tilt";
 import { Contador } from "@/components/contador";
 
-// Onde meu código roda: coluna esquerda fixa com o número total e o porquê
-// de nem tudo ter link; à direita, um card por casa com tudo que construí.
+// Onde meu código roda: o título e o "400+" se apresentam ao entrar; os cards
+// das casas DESLIZAM da direita (ecoando o desktop, onde eles ficam ao lado da
+// coluna do 400+). No desktop a coluna do total ainda gruda (sticky).
 export function Trajetoria() {
   const root = useRef<HTMLElement>(null);
 
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
-
-      // Cards sobem em cascata ao entrar na tela (só com movimento liberado).
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.from(gsap.utils.toArray<HTMLElement>(".traj-card", root.current), {
-          opacity: 0,
-          y: 44,
-          duration: 0.7,
-          ease: "power3.out",
-          stagger: 0.12,
-          scrollTrigger: {
-            trigger: root.current,
-            start: "top 70%",
-            once: true,
-          },
+        gsap.utils.toArray<HTMLElement>(".traj-reveal", root.current).forEach((el) => {
+          gsap.from(el, {
+            autoAlpha: 0,
+            y: 40,
+            duration: 0.8,
+            ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 85%", once: true },
+          });
+        });
+        gsap.utils.toArray<HTMLElement>(".traj-card", root.current).forEach((el) => {
+          gsap.from(el, {
+            autoAlpha: 0,
+            x: 64,
+            duration: 0.85,
+            ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 84%", once: true },
+          });
         });
       });
-
       return () => mm.revert();
     },
     { scope: root },
   );
 
   return (
-    <section ref={root} id="trajetoria" className="border-t border-line py-24 md:py-32">
-      <div className="mx-auto grid max-w-[1500px] gap-12 px-6 md:px-10 min-[900px]:grid-cols-[340px_1fr] min-[900px]:gap-16">
-        {/* Coluna esquerda: o total e a explicação, presos enquanto rola. */}
-        <aside className="min-[900px]:sticky min-[900px]:top-16 min-[900px]:self-start">
-          <p className="inline-block rounded-full border border-accent/40 px-4 py-1.5 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-accent">
+    <section ref={root} id="trajetoria" className="overflow-x-clip py-20 md:py-28">
+      <div className="mx-auto grid max-w-[1500px] gap-8 px-6 md:gap-12 md:px-10 motion-safe:lg:pl-[var(--rail-inset)] xl:grid-cols-[340px_1fr] xl:gap-16">
+        {/* Coluna esquerda: o total e a explicação, presos enquanto rola (desktop). */}
+        <aside className="xl:sticky xl:top-16 xl:self-start">
+          <p className="traj-reveal inline-block rounded-full border border-accent/40 px-4 py-1.5 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-accent">
             Trajetória
           </p>
-          <h2 className="mt-5 font-display text-4xl font-bold leading-[1.02] tracking-tight md:text-5xl">
+          <h2 className="traj-reveal mt-5 font-display text-4xl font-bold leading-[1.02] tracking-tight md:text-5xl">
             Onde meu
             <br />
             código roda.
           </h2>
 
-          <div className="mt-8 rounded-3xl border border-accent/30 bg-surface p-7">
+          <div className="traj-reveal mt-8 rounded-3xl border border-accent/30 bg-surface p-7">
             <p className="font-display text-6xl font-bold leading-none text-accent-hi tnum">
               <Contador valor={400} sufixo="+" />
             </p>
             <p className="mt-3 text-sm leading-relaxed text-text">{alcanceTotal.rotulo}</p>
           </div>
 
-          <p className="mt-6 max-w-xs text-lg font-medium leading-snug text-text">
+          <p className="traj-reveal mt-6 max-w-xs text-lg font-medium leading-snug text-text">
             A maioria é sistema interno:{" "}
             <span className="text-accent">não tem landing page pra visitar.</span>
           </p>
-          <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted">
+          <p className="traj-reveal mt-3 max-w-xs text-sm leading-relaxed text-muted">
             Roda na rede de quem contratou, todo dia. Por isso a prova aqui não
             é um link bonito: é quem usa.
           </p>

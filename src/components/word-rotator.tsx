@@ -5,9 +5,11 @@ import { gsap, useGSAP } from "@/lib/gsap";
 
 type WordRotatorProps = { words: string[]; interval?: number; className?: string };
 
-// Palavras trocando em loop contínuo. A parte animada é aria-hidden; o
-// leitor de tela ouve a lista completa uma vez (sem spam de aria-live).
-// O cursor em cima pausa (esperando a troca em curso terminar).
+// Palavras trocando em loop contínuo, na MESMA linha do "até". Deslizam de baixo
+// pra cima (nunca fica em branco) e ficam encostadas à ESQUERDA da caixa (logo
+// depois do "até"), não centralizadas. A caixa reserva a largura da palavra mais
+// larga com um fantasma invisível, então nada reflui. A parte animada é
+// aria-hidden; o leitor de tela ouve a lista uma vez.
 export function WordRotator({ words, interval = 2.2, className }: WordRotatorProps) {
   const root = useRef<HTMLSpanElement>(null);
 
@@ -17,9 +19,6 @@ export function WordRotator({ words, interval = 2.2, className }: WordRotatorPro
       if (items.length < 2) return;
 
       const mm = gsap.matchMedia();
-
-      // As duas condições complementares: o handler roda pra TODO usuário
-      // (só com "reduce" ele nunca dispararia no caso comum).
       mm.add(
         {
           reduce: "(prefers-reduced-motion: reduce)",
@@ -28,62 +27,43 @@ export function WordRotator({ words, interval = 2.2, className }: WordRotatorPro
         (context) => {
           const { reduce } = context.conditions as { reduce: boolean };
 
-          gsap.set(items, { opacity: 0, yPercent: 100 });
-          gsap.set(items[0], { opacity: 1, yPercent: 0 });
-
+          // Estado base: todas embaixo, a primeira no palco.
+          gsap.set(items, { yPercent: 110 });
+          gsap.set(items[0], { yPercent: 0 });
           if (reduce) return; // fica na primeira palavra
 
-          const tl = gsap.timeline({ repeat: -1 }); // contínuo (pausa sob o cursor)
+          // Esteira determinística: em cada troca, o próximo é PARADO embaixo
+          // (set explícito) e sobe enquanto o atual sai por cima. Sem fromTo /
+          // immediateRender, então nunca trava nem fica em branco no loop.
+          const tl = gsap.timeline({
+            repeat: -1,
+            defaults: { duration: 0.5, ease: "power2.inOut" },
+          });
           items.forEach((el, i) => {
             const next = items[(i + 1) % items.length];
-            tl.to(el, { yPercent: -100, opacity: 0, duration: 0.5, ease: "power3.in" }, `+=${interval}`)
-              .fromTo(
-                next,
-                { yPercent: 100, opacity: 0 },
-                { yPercent: 0, opacity: 1, duration: 0.6, ease: "power3.out" },
-                "<",
-              );
+            const marca = `t${i}`;
+            tl.addLabel(marca, `+=${interval}`);
+            tl.set(next, { yPercent: 110 }, marca);
+            tl.to(el, { yPercent: -110 }, marca);
+            tl.to(next, { yPercent: 0 }, marca);
           });
 
-          // Pausa sob o cursor (conteúdo em movimento precisa de freio) —
-          // mas nunca no MEIO de uma troca: termina a transição e aí para.
-          const el = root.current;
-          let pausado = false;
-          const pausar = () => {
-            pausado = true;
-            gsap.delayedCall(0.65, () => {
-              if (pausado) tl.pause();
-            });
-          };
-          const retomar = () => {
-            pausado = false;
-            tl.resume();
-          };
-          el?.addEventListener("pointerenter", pausar);
-          el?.addEventListener("pointerleave", retomar);
-
-          return () => {
-            el?.removeEventListener("pointerenter", pausar);
-            el?.removeEventListener("pointerleave", retomar);
-            tl.kill();
-          };
+          return () => tl.kill();
         },
       );
 
       return () => mm.revert();
     },
-    { scope: root, dependencies: [words, interval] },
+    { scope: root, dependencies: [words.join("|"), interval] },
   );
 
   return (
     <span
       ref={root}
-      className={`relative inline-block h-[1.15em] overflow-hidden pr-[0.05em] text-left align-bottom ${className ?? ""}`}
+      className={`relative inline-block h-[1.15em] translate-y-[0.12em] overflow-hidden text-left align-bottom ${className ?? ""}`}
     >
-      <span aria-hidden="true" className="relative block h-full">
-        {/* TODAS as palavras como fantasmas: a caixa fica com a largura da
-            mais LARGA em pixels (contar letras mentia: "automatizar" é mais
-            gorda que "simplificar" com o mesmo tanto de letras). */}
+      <span aria-hidden className="relative block h-full">
+        {/* Fantasma (h-0): dá a LARGURA da palavra mais larga em pixels. */}
         <span className="invisible block h-0 overflow-hidden">
           {words.map((word) => (
             <span key={word} className="block whitespace-nowrap">
@@ -92,7 +72,10 @@ export function WordRotator({ words, interval = 2.2, className }: WordRotatorPro
           ))}
         </span>
         {words.map((word) => (
-          <span key={word} className="word-rotator-item absolute inset-0 whitespace-nowrap">
+          <span
+            key={word}
+            className="word-rotator-item absolute inset-0 whitespace-nowrap text-left"
+          >
             {word}
           </span>
         ))}

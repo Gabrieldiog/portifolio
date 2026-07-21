@@ -54,7 +54,7 @@ export function LenisProvider({ children }: { children: ReactNode }) {
   if (reducedMotion) return <>{children}</>;
 
   return (
-    <ReactLenis root options={{ autoRaf: false, lerp: 0.1, duration: 1.2, syncTouch: true }}>
+    <ReactLenis root options={{ autoRaf: false, lerp: 0.1, duration: 1.2, syncTouch: false }}>
       <LenisGsapSync />
       {children}
     </ReactLenis>
